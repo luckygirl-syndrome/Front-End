@@ -87,7 +87,7 @@ class _LoginForm extends StatelessWidget {
           onPressed: () => context.go('/home'),
           borderRadius: 4,
           height: 40,
-          textStyle: AppTextStyles.ptdBold(12).copyWith(color: AppColors.white),
+          textStyle: AppTextStyles.ptdBold(12),
         ),
       ],
     );

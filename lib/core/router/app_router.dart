@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
-import '../../features/auth/screens/login_screen.dart';
-import '../../features/auth/screens/signup_screen.dart';
+import '../../features/login/screens/login_screen.dart';
+import '../../features/signup/screens/signup_screen.dart';
 // import '../../features/home/screens/home_screen.dart'; // 홈 화면 생기면 주석 해제
 
 final appRouter = GoRouter(

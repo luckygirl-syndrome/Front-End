@@ -3,12 +3,24 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class AppTextField extends StatefulWidget {
+  // 1. 생성자에 파라미터 추가
+  final Function(String)? onSubmitted; // 이 줄 추가
+
   final String hint;
   final bool obscureText;
   final TextEditingController? controller;
   final double? borderRadius;
   final Color? borderColor;
   final Color? focusedBorderColor;
+  // 1. 패딩을 외부에서 결정할 수 있도록 속성 추가
+  final EdgeInsetsGeometry? contentPadding;
+  final Widget? suffixIcon;
+  // ⭐ 아이콘 크기를 조절할 수 있는 변수 추가 (기본값 20)
+  final double iconSize;
+
+  // ⭐ 가려졌을 때와 보일 때의 아이콘을 직접 받을 수 있게 추가
+  final Widget? obscureIcon;
+  final Widget? visibleIcon;
 
   // 개별 속성 대신 텍스트 스타일 통째로 관리
   final TextStyle? textStyle;
@@ -19,11 +31,17 @@ class AppTextField extends StatefulWidget {
     required this.hint,
     this.obscureText = false,
     this.controller,
+    this.iconSize = 20,
     this.borderRadius,
     this.borderColor,
     this.focusedBorderColor,
     this.textStyle,
     this.hintStyle,
+    this.contentPadding,
+    this.onSubmitted,
+    this.suffixIcon,
+    this.obscureIcon,
+    this.visibleIcon,
   });
 
   @override
@@ -33,6 +51,8 @@ class AppTextField extends StatefulWidget {
 class _AppTextFieldState extends State<AppTextField> {
   late TextEditingController _internalController;
   bool _hasText = false;
+  // ⭐ 해결책 1: late를 제거하고 기본값으로 false를 줍니다.
+  bool _isObscured = false;
 
   @override
   void initState() {
@@ -45,12 +65,29 @@ class _AppTextFieldState extends State<AppTextField> {
 
     // 초기값 있을 경우 대응
     _hasText = _internalController.text.isNotEmpty;
+
+    // 초기값 설정
+    _isObscured = widget.obscureText;
   }
 
   void _updateState() {
     if (_internalController.text.isNotEmpty != _hasText) {
+      // ⭐ 위젯이 화면에서 제거된 상태라면 setState를 실행하지 않도록 방어!
+      if (!mounted) return;
+
       setState(() {
         _hasText = _internalController.text.isNotEmpty;
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AppTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 페이지가 전환될 때 obscureText 값이 바뀌면 내부 상태도 동기화
+    if (oldWidget.obscureText != widget.obscureText) {
+      setState(() {
+        _isObscured = widget.obscureText;
       });
     }
   }
@@ -62,6 +99,37 @@ class _AppTextFieldState extends State<AppTextField> {
       _internalController.dispose();
     }
     super.dispose();
+  }
+
+  Widget? _buildSuffixIcon() {
+    if (widget.suffixIcon != null) return widget.suffixIcon;
+
+    if (widget.obscureText) {
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _isObscured = !_isObscured;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.only(right: 24),
+          color: Colors.transparent,
+          child: SizedBox(
+            // ⭐ SizedBox로 크기를 확실하게 고정합니다.
+            width: _isObscured ? widget.iconSize : widget.iconSize * 0.7,
+            child: Image.asset(
+              _isObscured
+                  ? 'assets/images/eye_1.png'
+                  : 'assets/images/eye_2.png',
+              // ⭐ 이미지가 지정된 크기에 꽉 차도록 설정
+              fit: BoxFit.contain,
+              color: AppColors.lightGrey,
+            ),
+          ),
+        ),
+      );
+    }
+    return null;
   }
 
   @override
@@ -88,20 +156,30 @@ class _AppTextFieldState extends State<AppTextField> {
     return SizedBox(
       child: TextField(
         controller: _internalController,
-        obscureText: widget.obscureText,
+        onSubmitted: widget.onSubmitted,
+        // ⭐ 내부 상태값(_isObscured)을 사용함
+        obscureText: _isObscured,
         textAlignVertical: TextAlignVertical.center, // 텍스트 수직 중앙 정렬
         style: finalTextStyle,
         decoration: InputDecoration(
+          suffixIconConstraints: const BoxConstraints(
+            minHeight: 0,
+            minWidth: 0,
+          ),
           hintText: widget.hint,
           hintStyle: finalHintStyle,
 
-          // 2. ⭐ 핵심: isDense를 true로 줘야 기본 여백이 제거되어 
+          // 핵심: isDense를 true로 줘야 기본 여백이 제거되어
           // 우리가 설정한 contentPadding이 정확하게 먹힙니다.
           isDense: true,
 
           // 피그마 수치대로 넣되, 실제 렌더링을 보며 상하(vertical) 값을 조금씩 조정하세요.
-          contentPadding:
+          // 외부에서 주면 쓰고, 안 주면 기본값(14)을 쓰도록 설정
+          contentPadding: widget.contentPadding ??
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+
+          // ⭐ 결정된 아이콘 적용
+          suffixIcon: _buildSuffixIcon(),
 
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),

@@ -19,23 +19,23 @@ class LoginScreen extends ConsumerWidget {
             // 1. 양옆에 고정 패딩을 줍니다 (팀장님 말씀하신 32 기준)
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 72),
-                // 2. 너무 큰 화면(태블릿 등)에서 무한정 늘어나지 않게 최대 너비만 제한합니다.
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: const Column(
-                    mainAxisSize: MainAxisSize.min, // 중앙 정렬을 위해 최소 크기로
-                    children: [
-                      _HeaderSection(),
-                      SizedBox(height: 44), // 4의 배수 적용!
-                      _LoginForm(),
-                      SizedBox(height: 40), // 4의 배수 적용!
-                      _FooterSection(),
-                      SizedBox(height: 100),
-                    ],
-                  ),
+              // 2. 너무 큰 화면(태블릿 등)에서 무한정 늘어나지 않게 최대 너비만 제한합니다.
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min, // 중앙 정렬을 위해 최소 크기로
+                  children: [
+                    _HeaderSection(),
+                    SizedBox(height: 44), // 4의 배수 적용!
+                    _LoginForm(),
+                    SizedBox(height: 40), // 4의 배수 적용!
+                    _FooterSection(),
+                    SizedBox(height: 100),
+                  ],
                 ),
               ),
             ),
+          ),
         ),
       ),
     );
@@ -73,16 +73,24 @@ class _LoginForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, // 텍스트 라벨 왼쪽 정렬
       children: [
-        Text('아이디', 
+        Text('아이디',
             style: AppTextStyles.ptdBold(12).copyWith(color: AppColors.black)),
         const SizedBox(height: 8),
-        AppTextField(hint: '아이디를 입력해주세요', textStyle: AppTextStyles.ptdRegular(12), hintStyle: AppTextStyles.ptdRegular(12)),
+        AppTextField(
+            hint: '아이디를 입력해주세요',
+            textStyle: AppTextStyles.ptdRegular(12),
+            hintStyle: AppTextStyles.ptdRegular(12)),
         const SizedBox(height: 24),
         Text('비밀번호',
             style: AppTextStyles.ptdBold(12).copyWith(color: AppColors.black)),
         const SizedBox(height: 8),
         AppTextField(
-            hint: '비밀번호를 입력해주세요', textStyle: AppTextStyles.ptdRegular(12), hintStyle: AppTextStyles.ptdRegular(12), obscureText: true),
+          hint: '비밀번호를 입력해주세요',
+          textStyle: AppTextStyles.ptdRegular(12),
+          hintStyle: AppTextStyles.ptdRegular(12),
+          obscureText: true,
+          iconSize: 14,
+        ),
         const SizedBox(height: 12),
         AppButton(
           text: '시작하기',

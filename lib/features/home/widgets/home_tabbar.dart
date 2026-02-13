@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 
-class HomeTabBar extends StatefulWidget {
-  HomeTabBar({super.key});
+// 👈 1. StatelessWidget으로 변경하여 단일 진실 공급원(Single Source of Truth) 원칙 준수 [cite: 2026-01-02]
+class HomeTabBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabChanged;
 
-  @override
-  State<HomeTabBar> createState() => _HomeTabBarState();
-}
-
-class _HomeTabBarState extends State<HomeTabBar> {
-  int _selectedIndex = 0;
+  const HomeTabBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTabChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,6 @@ class _HomeTabBarState extends State<HomeTabBar> {
               ],
             ),
           ),
-          // 👈 하단 회색 선과 인디케이터 사이의 여백을 전산학적으로 0으로 고정 [cite: 2026-02-13]
           const Divider(height: 1, thickness: 1, color: AppColors.paleGrey),
         ],
       ),
@@ -40,15 +40,17 @@ class _HomeTabBarState extends State<HomeTabBar> {
   }
 
   Widget _buildTabItem(String title, int index) {
-    final isSelected = _selectedIndex == index;
+    // 👈 2. 내부 변수 대신 부모가 넘겨준 currentIndex를 직접 사용 [cite: 2026-02-13]
+    final isSelected = currentIndex == index;
 
     return GestureDetector(
       onTap: () {
-        if (_selectedIndex != index) {
-          setState(() => _selectedIndex = index);
+        // 👈 3. 클릭 시 부모의 상태를 바꾸도록 콜백 함수 실행 [cite: 2026-01-02]
+        if (currentIndex != index) {
+          onTabChanged(index);
         }
       },
-      child: IntrinsicWidth( // 👈 텍스트 크기만큼 너비를 명백히 제한 [cite: 2026-01-02, 2026-02-13]
+      child: IntrinsicWidth(
         child: Column(
           children: [
             Text(
@@ -57,11 +59,9 @@ class _HomeTabBarState extends State<HomeTabBar> {
                 color: isSelected ? AppColors.black : AppColors.lightGrey,
               ),
             ),
-            const SizedBox(height: 12), // 텍스트와 선 사이 간격
-            // 인디케이터: Divider 바로 위에 붙도록 설정 [cite: 2026-02-13]
+            const SizedBox(height: 12),
             Container(
               height: 3,
-              // 선택된 경우에만 텍스트 너비(IntrinsicWidth)를 100% 채움 [cite: 2026-02-13]
               width: isSelected ? double.infinity : 0, 
               color: isSelected ? AppColors.black : Colors.transparent,
             ),

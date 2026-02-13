@@ -6,7 +6,16 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class LinkInputPopup extends StatefulWidget {
-  const LinkInputPopup({super.key});
+  final String title;      // 팝업 제목
+  final String hint;       // 입력창 힌트
+  final String buttonText; // 버튼 텍스트
+
+  const LinkInputPopup({
+    super.key,
+    this.title = '어떤 옷이\n당신의 구미를 당기나요?', // 기본값 설정
+    this.hint = '링크를 입력해 주세요',
+    this.buttonText = '확인',
+  });
 
   @override
   State<LinkInputPopup> createState() => _LinkInputPopupState();
@@ -73,24 +82,20 @@ class _LinkInputPopupState extends State<LinkInputPopup> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '어떤 옷이\n당신의 구미를 당기나요?',
+                  widget.title, // 👈 주입받은 제목 사용
                   textAlign: TextAlign.center,
                   style: AppTextStyles.ptdBold(20).copyWith(height: 1.4),
                 ),
                 const SizedBox(height: 24),
-                
-                // 3. 공통 위젯 AppTextField 적용
                 AppTextField(
-                  hint: '링크를 입력해 주세요',
+                  hint: widget.hint, // 👈 주입받은 힌트 사용
                   controller: _controller,
                   borderRadius: 12,
                 ),
                 const SizedBox(height: 16),
-                
-                // 4. 공통 위젯 AppButton 적용
                 AppButton(
-                  text: '확인',
-                  onPressed: _isFilled ? () => Navigator.pop(context) : () {},
+                  text: widget.buttonText, // 👈 주입받은 버튼 텍스트 사용
+                  onPressed: _isFilled ? () => Navigator.pop(context, _controller.text) : () {},
                   backgroundColor: _isFilled ? AppColors.primaryMain : const Color(0xFFCCCCCC),
                   borderRadius: 12,
                   textStyle: AppTextStyles.ptdBold(16),

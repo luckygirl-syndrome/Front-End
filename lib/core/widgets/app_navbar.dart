@@ -65,8 +65,8 @@ class _NavbarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // 1. 상태에 따라 아이콘 경로 자동 생성 (chat -> chat_fill)
     final String iconPath = isSelected 
-        ? 'assets/icons/${name}_fill.png' 
-        : 'assets/icons/$name.png';
+        ? 'assets/icons/${name}_fill.svg' 
+        : 'assets/icons/$name.svg';
 
     return GestureDetector(
       onTap: onTap,

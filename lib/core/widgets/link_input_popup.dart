@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'app_button.dart';
+import 'app_text_field.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
+
+class LinkInputPopup extends StatefulWidget {
+  const LinkInputPopup({super.key});
+
+  @override
+  State<LinkInputPopup> createState() => _LinkInputPopupState();
+}
+
+class _LinkInputPopupState extends State<LinkInputPopup> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isFilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 텍스트 감지하여 버튼 상태 업데이트
+    _controller.addListener(() {
+      final isNotEmpty = _controller.text.isNotEmpty;
+      if (isNotEmpty != _isFilled) {
+        setState(() => _isFilled = isNotEmpty);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      // 1. Modifier.padding(horizontal = 32.dp) 반영
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // 닫기 버튼
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            padding: EdgeInsets.zero, // 터치 영역 최적화
+            constraints: const BoxConstraints(), // 기본 패딩 제거
+            icon: SvgPicture.asset( // 👈 Image.asset 대신 SvgPicture.asset 사용
+              'assets/icons/close_button.svg',
+              width: 40,
+              height: 40,
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // 2. 메인 팝업 컨테이너 (height: 274.dp)
+          Container(
+            width: double.infinity,
+            height: 274,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '어떤 옷이\n당신의 구미를 당기나요?',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.ptdBold(20).copyWith(height: 1.4),
+                ),
+                const SizedBox(height: 24),
+                
+                // 3. 공통 위젯 AppTextField 적용
+                AppTextField(
+                  hint: '링크를 입력해 주세요',
+                  controller: _controller,
+                  borderRadius: 12,
+                ),
+                const SizedBox(height: 16),
+                
+                // 4. 공통 위젯 AppButton 적용
+                AppButton(
+                  text: '확인',
+                  onPressed: _isFilled ? () => Navigator.pop(context) : () {},
+                  backgroundColor: _isFilled ? AppColors.primaryMain : const Color(0xFFCCCCCC),
+                  borderRadius: 12,
+                  textStyle: AppTextStyles.ptdBold(16),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -96,7 +96,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (!mounted || _controllers.isEmpty) return false;
 
     // ⭐ 에러 발생 지점 수정: 안전하게 List<String>으로 복사
-    final List<String> guides = List<String>.from(_pageData[_currentPage]['guides'] ?? []);
+    final List<String> guides =
+        List<String>.from(_pageData[_currentPage]['guides'] ?? []);
 
     // 가이드가 없는 페이지(닉네임)는 텍스트 입력 여부만 확인
     if (guides.isEmpty) {
@@ -172,6 +173,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           textStyle: AppTextStyles.ptdRegular(16),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+          // 👈 여기에 추가하세요!
+          onSubmitted: (_) {
+            // 1. 현재 페이지의 조건이 충족(canProceed)되었는지 확인
+            if (_isPageValid) {
+              if (_currentPage < 3) {
+                // 2. 다음 페이지로 이동
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+                // 3. 키보드 닫기 (필요시)
+                FocusScope.of(context).unfocus();
+              } else {
+                // 4. 마지막 페이지라면 가입 완료 로직 실행
+                // 여기에 버튼의 else 문에 들어갈 로직을 똑같이 넣으면 됩니다.
+              }
+            }
+          },
         ),
 
         const SizedBox(height: 16),

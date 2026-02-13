@@ -3,6 +3,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class AppTextField extends StatefulWidget {
+  // 1. 생성자에 파라미터 추가
+  final Function(String)? onSubmitted; // 이 줄 추가
+
   final String hint;
   final bool obscureText;
   final TextEditingController? controller;
@@ -26,7 +29,8 @@ class AppTextField extends StatefulWidget {
     this.focusedBorderColor,
     this.textStyle,
     this.hintStyle,
-    this.contentPadding, 
+    this.contentPadding,
+    this.onSubmitted, 
   });
 
   @override
@@ -91,6 +95,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return SizedBox(
       child: TextField(
         controller: _internalController,
+        onSubmitted: widget.onSubmitted,
         obscureText: widget.obscureText,
         textAlignVertical: TextAlignVertical.center, // 텍스트 수직 중앙 정렬
         style: finalTextStyle,
@@ -98,13 +103,13 @@ class _AppTextFieldState extends State<AppTextField> {
           hintText: widget.hint,
           hintStyle: finalHintStyle,
 
-          // 핵심: isDense를 true로 줘야 기본 여백이 제거되어 
+          // 핵심: isDense를 true로 줘야 기본 여백이 제거되어
           // 우리가 설정한 contentPadding이 정확하게 먹힙니다.
           isDense: true,
 
           // 피그마 수치대로 넣되, 실제 렌더링을 보며 상하(vertical) 값을 조금씩 조정하세요.
           // 외부에서 주면 쓰고, 안 주면 기본값(14)을 쓰도록 설정
-          contentPadding: widget.contentPadding ?? 
+          contentPadding: widget.contentPadding ??
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
 
           enabledBorder: OutlineInputBorder(

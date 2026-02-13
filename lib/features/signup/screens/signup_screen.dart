@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // 1. 공통 위젯들
-import '../../../core/widgets/app_text_field.dart';
-import '../../../core/widgets/app_button.dart';
-import '../widgets/signup_guide_item.dart'; // 방금 만든 가이드 아이템
+import '../widgets/signup_app_bar.dart';
+import '../widgets/signup_footer.dart';
+import '../widgets/signup_page_content.dart';
 
 // 2. 테마 및 스타일
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 
 // 3. 방금 만든 프로바이더
 import '../providers/signup_provider.dart';
@@ -32,12 +31,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(signupProvider); // 상태 읽기
-    final notifier = ref.read(signupProvider.notifier); // 로직 접근
+    final state = ref.watch(signupProvider);
+    final notifier = ref.read(signupProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: _buildAppBar(context, state.currentPage),
+      // 1. 커스텀 앱바 적용
+      appBar: SignupAppBar(
+        currentPage: state.currentPage,
+        onBackPressed: _handleBack,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -50,41 +53,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   onPageChanged: notifier.setPage,
                   itemCount: _pageData.length,
-                  itemBuilder: (context, index) => _buildPageContent(index, state, notifier),
+                  itemBuilder: (context, index) => SignupPageContent(
+                    data: _pageData[index],
+                    index: index,
+                    state: state,
+                    notifier: notifier,
+                    onSubmitted: (_) => _handleNext(state, notifier),
+                  ),
                 ),
               ),
-              _buildFooter(state, notifier),
-              const SizedBox(height: 20),
+              // 2. 커스텀 푸터 적용
+              SignupFooter(
+                currentPage: state.currentPage,
+                isPageValid: notifier.isPageValid(_pageData),
+                onNextPressed: () => _handleNext(state, notifier),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPageContent(int index, SignupState state, SignupNotifier notifier) {
-    final data = _pageData[index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(data['title']!, style: AppTextStyles.ptdBold(24).copyWith(color: AppColors.black)),
-        if (data['subTitle'] != null) ...[
-          const SizedBox(height: 8),
-          Text(data['subTitle']!, style: AppTextStyles.ptdRegular(12).copyWith(color: AppColors.lightGrey)),
-        ],
-        const SizedBox(height: 78),
-        AppTextField(
-          controller: state.controllers[index],
-          hint: data['hint']!,
-          obscureText: index >= 2,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-          onSubmitted: (_) => _handleNext(state, notifier),
-        ),
-        const SizedBox(height: 16),
-        ...List<String>.from(data['guides'] ?? []).asMap().entries.map((e) => 
-          SignupGuideItem(text: e.value, isValid: notifier.isGuideValid(index, e.key))
-        ),
-      ],
     );
   }
 
@@ -93,38 +80,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       if (state.currentPage < 3) {
         _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
         FocusScope.of(context).unfocus();
-      } else { /* 가입 로직 */ }
+      } else { /* 회원가입 완료 API 호출 */ }
     }
   }
 
-  Widget _buildFooter(SignupState state, SignupNotifier notifier) {
-    // 현재 페이지가 유효한지 미리 변수에 담아두면 깔끔합니다.
-    final bool isPageValid = notifier.isPageValid(_pageData);
-
-    return Column(children: [
-      AppButton(
-        text: state.currentPage == 3 ? '가보자고~!' : '다음',
-        // ⭐ null 대신 () {} 를 주면 버튼 색이 변하지 않습니다.
-        onPressed: isPageValid 
-            ? () => _handleNext(state, notifier) 
-            : () {}, // 조건이 안 맞을 땐 눌러도 반응만 없을 뿐, 색은 그대로!
-      ),
-      const SizedBox(height: 20),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center, 
-        children: List.generate(4, (i) => _buildDot(i, state.currentPage)),
-      ),
-    ]);
+  void _handleBack() {
+    if (_pageController.page!.toInt() > 0) {
+      _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    } else {
+      context.pop();
+    }
   }
-
-  Widget _buildDot(int index, int current) => Container(
-    width: 8, height: 8, margin: const EdgeInsets.symmetric(horizontal: 4),
-    decoration: BoxDecoration(shape: BoxShape.circle, color: current == index ? AppColors.black : AppColors.lightGrey),
-  );
-
-  AppBar _buildAppBar(context, int current) => AppBar(
-    backgroundColor: AppColors.white, elevation: 0,
-    leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-      onPressed: () => current > 0 ? _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut) : GoRouter.of(context).pop()),
-  );
 }

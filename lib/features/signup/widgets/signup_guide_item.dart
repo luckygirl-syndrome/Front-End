@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+// 유효성 검사 가이드 라인
 class SignupGuideItem extends StatelessWidget {
   final String text;
   final bool isValid;

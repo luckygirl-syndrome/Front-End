@@ -95,9 +95,13 @@ class _AppTextFieldState extends State<AppTextField> {
           hintText: widget.hint,
           hintStyle: finalHintStyle,
 
+          // 2. ⭐ 핵심: isDense를 true로 줘야 기본 여백이 제거되어 
+          // 우리가 설정한 contentPadding이 정확하게 먹힙니다.
+          isDense: true,
+
           // 피그마 수치대로 넣되, 실제 렌더링을 보며 상하(vertical) 값을 조금씩 조정하세요.
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
 
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 4),

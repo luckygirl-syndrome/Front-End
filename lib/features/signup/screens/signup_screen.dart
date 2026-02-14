@@ -80,7 +80,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       if (state.currentPage < 3) {
         _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
         FocusScope.of(context).unfocus();
-      } else { /* 회원가입 완료 API 호출 */ }
+      } else { context.go('/sbti_start'); }
     }
   }
 

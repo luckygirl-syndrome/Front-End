@@ -15,12 +15,15 @@ class SbtiState {
 }
 
 class SbtiNotifier extends StateNotifier<SbtiState> {
-  SbtiNotifier() : super(SbtiState(scores: {'D': 0, 'N': 0, 'S': 0, 'A': 0, 'M': 0, 'T': 0}));
+  SbtiNotifier()
+      : super(SbtiState(
+            scores: {'D': 0, 'N': 0, 'S': 0, 'A': 0, 'M': 0, 'T': 0}));
 
   void selectOption(String type) {
+ // 점수 업데이트 로직
     final newScores = Map<String, int>.from(state.scores);
     newScores[type] = (newScores[type] ?? 0) + 1;
-    
+
     state = state.copyWith(
       currentIndex: state.currentIndex + 1,
       scores: newScores,
@@ -32,6 +35,9 @@ class SbtiNotifier extends StateNotifier<SbtiState> {
       state = state.copyWith(currentIndex: state.currentIndex - 1);
     }
   }
+
+  void nextPage() {}
 }
 
-final sbtiProvider = StateNotifierProvider<SbtiNotifier, SbtiState>((ref) => SbtiNotifier());
+final sbtiProvider =
+    StateNotifierProvider<SbtiNotifier, SbtiState>((ref) => SbtiNotifier());

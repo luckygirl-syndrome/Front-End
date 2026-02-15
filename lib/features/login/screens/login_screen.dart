@@ -94,7 +94,7 @@ class _LoginForm extends StatelessWidget {
         const SizedBox(height: 12),
         AppButton(
           text: '시작하기',
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.go('/sbti_start'),
           borderRadius: 4,
           textStyle: AppTextStyles.ptdBold(12),
         ),

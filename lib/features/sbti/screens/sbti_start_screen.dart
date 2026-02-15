@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../widgets/sbti_background.dart';
-import '../widgets/sbti_action_buttons.dart';
+import '../../../core/widgets/two_buttons.dart';
 import 'package:go_router/go_router.dart';
 
 class SbtiStartScreen extends ConsumerWidget {
@@ -38,7 +38,7 @@ class SbtiStartScreen extends ConsumerWidget {
                   ),
                   const Spacer(),
 
-                  SbtiActionButtons(
+                  TwoButtons(
                     onDislike: () {
                       context.go('/sbti_no_like');
                     },

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // 1. 공통 위젯들
-import '../widgets/signup_app_bar.dart';
+import '../../../core/widgets/app_back_bar.dart';
 import '../widgets/signup_footer.dart';
 import '../widgets/signup_page_content.dart';
 
@@ -35,9 +35,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final notifier = ref.read(signupProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Colors.white,
       // 1. 커스텀 앱바 적용
-      appBar: SignupAppBar(
+      appBar: AppBackBar(
         currentPage: state.currentPage,
         onBackPressed: _handleBack,
       ),

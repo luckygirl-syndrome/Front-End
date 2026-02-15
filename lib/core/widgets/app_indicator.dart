@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../theme/app_colors.dart';
 
-class SignupIndicator extends StatelessWidget {
+class AppIndicator extends StatelessWidget {
   final int currentPage;
   final int totalPage;
 
-  const SignupIndicator({
+  const AppIndicator({
     super.key,
     required this.currentPage,
     required this.totalPage,

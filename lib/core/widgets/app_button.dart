@@ -12,6 +12,7 @@ class AppButton extends StatelessWidget {
   final double? borderRadius;
   final EdgeInsetsGeometry? padding;
   final Color? borderColor;
+  final double? borderWidth;
   
   final TextStyle? textStyle; // 👈 개별 속성 대신 스타일 통째로!
 
@@ -26,6 +27,7 @@ class AppButton extends StatelessWidget {
     this.textStyle,
     this.padding,
     this.borderColor,
+    this.borderWidth,
   });
 
   @override
@@ -53,7 +55,7 @@ class AppButton extends StatelessWidget {
           // 이렇게 하면 기본적으로는 선이 안 보이고, borderColor를 주면 그제야 선이 보입니다.
           side: BorderSide(
             color: borderColor ?? finalBgColor, 
-            width: 1, // 두께는 기본 1로 고정
+            width: borderWidth ?? 1, // 두께는 기본 1로 고정
           ),
 
           shape: RoundedRectangleBorder(

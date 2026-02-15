@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/app_button.dart';
-import 'signup_indicator.dart';
+import '../../../core/widgets/app_indicator.dart';
 
 class SignupFooter extends StatelessWidget {
   final int currentPage;
@@ -25,7 +25,7 @@ class SignupFooter extends StatelessWidget {
           onPressed: isPageValid ? onNextPressed : () {},
         ),
         const SizedBox(height: 20),
-        SignupIndicator(currentPage: currentPage, totalPage: 4),
+        AppIndicator(currentPage: currentPage, totalPage: 4),
         const SizedBox(height: 20),
       ],
     );

@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../signup/widgets/signup_app_bar.dart';
+import '../../../core/widgets/app_back_bar.dart';
 import '../providers/sbti_provider.dart';
 import '../widgets/sbti_question_button.dart';
-import '../widgets/sbti_background.dart';
 
 class SbtiQuestionScreen extends ConsumerWidget {
   const SbtiQuestionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 1. 질문 완료 시 화면 이동 로직
+    ref.listen<SbtiState>(sbtiProvider, (previous, next) {
+      if (next.currentIndex >= 9) {
+        context.go('/initial_question_start');
+      }
+    });
+
     final state = ref.watch(sbtiProvider);
     final notifier = ref.read(sbtiProvider.notifier);
 
@@ -95,19 +101,19 @@ class SbtiQuestionScreen extends ConsumerWidget {
       },
     ];
 
+    // [수정] 인덱스 안전장치: 질문 완료 시점이면 더 이상 아래 로직을 타지 않음
     if (state.currentIndex >= questions.length) {
-      return const Scaffold(body: Center(child: Text("결과 계산 중...")));
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-
+    
     final currentQ = questions[state.currentIndex];
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: SignupAppBar(
+      appBar: AppBackBar(
         currentPage: state.currentIndex,
-        onBackPressed: () => state.currentIndex == 0 
-            ? context.pop() 
-            : notifier.previousPage(),
+        onBackPressed: () =>
+            state.currentIndex == 0 ? context.pop() : notifier.previousPage(),
       ),
       body: Stack(
         children: [
@@ -117,45 +123,42 @@ class SbtiQuestionScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   // --- [1] 상단 고정: 질문 영역 ---
-                  const SizedBox(height: 12),
                   Text(
-                    'Q${state.currentIndex + 1}.',
-                    style: AppTextStyles.ptdBold(24),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    currentQ['q']!,
+                    'Q${state.currentIndex + 1}\n\n${currentQ['q'] as String}',
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.ptdBold(22).copyWith(height: 1.4),
+                    style: AppTextStyles.ptdBold(24),
                   ),
 
                   // --- [2] 가변 영역: 질문과 인디케이터 사이 정중앙 ---
                   Expanded(
                     child: Column(
                       children: [
-                        const Spacer(), 
+                        const Spacer(),
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SbtiQuestionButton(
                               text: currentQ['a']!,
-                              onTap: () => notifier.selectOption(currentQ['at']!),
+                              onTap: () =>
+                                  notifier.selectOption(currentQ['at']!),
                             ),
                             const SizedBox(height: 16),
                             SbtiQuestionButton(
                               text: currentQ['b']!,
-                              onTap: () => notifier.selectOption(currentQ['bt']!),
+                              onTap: () =>
+                                  notifier.selectOption(currentQ['bt']!),
                             ),
                             if (currentQ.containsKey('c')) ...[
                               const SizedBox(height: 16),
                               SbtiQuestionButton(
                                 text: currentQ['c']!,
-                                onTap: () => notifier.selectOption(currentQ['ct']!),
+                                onTap: () =>
+                                    notifier.selectOption(currentQ['ct']!),
                               ),
                             ],
                           ],
                         ),
-                        const Spacer(), 
+                        const Spacer(),
                       ],
                     ),
                   ),

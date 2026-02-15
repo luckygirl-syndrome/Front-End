@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-// 유효성 검사 가이드 라인
+/// [2] SignupGuideItem: 유효성 검사 결과를 시각적으로 표현
+/// 조건(isValid)에 따라 아이콘과 텍스트의 색상을 변경합니다.
 class SignupGuideItem extends StatelessWidget {
   final String text;
   final bool isValid;

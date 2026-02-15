@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../login_provider.dart';
+import '../providers/login_provider.dart';
 
 class LoginForm extends ConsumerWidget {
   const LoginForm({super.key});

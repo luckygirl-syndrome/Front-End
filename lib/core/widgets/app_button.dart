@@ -13,7 +13,7 @@ class AppButton extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Color? borderColor;
   final double? borderWidth;
-  
+
   final TextStyle? textStyle; // 👈 개별 속성 대신 스타일 통째로!
 
   const AppButton({
@@ -36,7 +36,8 @@ class AppButton extends StatelessWidget {
     final Color finalBgColor = backgroundColor ?? AppColors.primaryMain;
 
     // 1. 스타일을 변수로 빼서 가독성을 높입니다.
-    final TextStyle finalTextStyle = (textStyle ?? AppTextStyles.ptdBold(20)).copyWith(
+    final TextStyle finalTextStyle =
+        (textStyle ?? AppTextStyles.ptdBold(20)).copyWith(
       color: textStyle?.color ?? textColor ?? AppColors.white,
     );
 
@@ -46,7 +47,7 @@ class AppButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.primaryMain,
           // 2. 중요! 보라색 방지용 (글자/아이콘 색상 강제 지정)
-          foregroundColor: finalTextStyle.color, 
+          foregroundColor: finalTextStyle.color,
           elevation: 0,
           // 4의 배수 시스템 적용: 기본 상하 16)
           padding: padding ?? const EdgeInsets.symmetric(vertical: 14),
@@ -54,7 +55,7 @@ class AppButton extends StatelessWidget {
           // 2. 테두리 설정: borderColor가 없으면 배경색과 똑같은 색을 줍니다.
           // 이렇게 하면 기본적으로는 선이 안 보이고, borderColor를 주면 그제야 선이 보입니다.
           side: BorderSide(
-            color: borderColor ?? finalBgColor, 
+            color: borderColor ?? finalBgColor,
             width: borderWidth ?? 1, // 두께는 기본 1로 고정
           ),
 
@@ -65,6 +66,18 @@ class AppButton extends StatelessWidget {
           // 패딩이 정확히 먹히도록 최소 사이즈 제약 해제
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
+          // 1. 클릭 시 물결이 퍼지는 효과 제거
+          splashFactory: NoSplash.splashFactory,
+        ).copyWith(
+          // 2. 클릭 중일 때 덮어씌워지는 회색(overlay)을 투명하게 설정
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+
+          // 3. (참고) 로딩 중(onPressed가 null)일 때 버튼 색이 변하는 게 싫다면 아래도 추가
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) return finalBgColor;
+            return finalBgColor;
+          }),
         ),
         onPressed: onPressed,
         child: Text(

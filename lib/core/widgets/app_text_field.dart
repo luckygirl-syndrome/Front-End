@@ -5,6 +5,7 @@ import '../../../core/theme/app_text_styles.dart';
 class AppTextField extends StatefulWidget {
   // 1. 생성자에 파라미터 추가
   final Function(String)? onSubmitted; // 이 줄 추가
+  final Function(String)? onChanged; // 이 줄 추가
 
   final String hint;
   final bool obscureText;
@@ -39,6 +40,7 @@ class AppTextField extends StatefulWidget {
     this.hintStyle,
     this.contentPadding,
     this.onSubmitted,
+    this.onChanged,
     this.suffixIcon,
     this.obscureIcon,
     this.visibleIcon,
@@ -157,7 +159,7 @@ class _AppTextFieldState extends State<AppTextField> {
       child: TextField(
         controller: _internalController,
         onSubmitted: widget.onSubmitted,
-        // ⭐ 내부 상태값(_isObscured)을 사용함
+        onChanged: widget.onChanged,
         obscureText: _isObscured,
         textAlignVertical: TextAlignVertical.center, // 텍스트 수직 중앙 정렬
         style: finalTextStyle,

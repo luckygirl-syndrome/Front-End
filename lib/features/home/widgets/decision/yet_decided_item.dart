@@ -4,21 +4,31 @@ import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 
 class YetDecidedItem extends StatelessWidget {
-  const YetDecidedItem({super.key});
+  final String imageUrl;
+  final String title;
+  final String price;
+  final String dateTag;
+  
+  const YetDecidedItem({
+    super.key,
+    required this.imageUrl,
+    required this.title,
+    required this.price,
+    required this.dateTag,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       // 1. Modifier.width(326.dp).height(120.dp)
       width: double.infinity,
-      height: 120,
       // 2. Modifier.shadow 및 background(shape = RoundedCornerShape(12.dp))
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x261C1C1C),
+            color: Color(0x26000000),
             blurRadius: 12, // elevation 12.dp에 대응하는 전산학적 수치
           ),
         ],
@@ -33,7 +43,7 @@ class YetDecidedItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              'assets/images/product_sample.png',
+              imageUrl,
               width: 80,
               height: 80,
               fit: BoxFit.cover,
@@ -43,28 +53,36 @@ class YetDecidedItem extends StatelessWidget {
           const SizedBox(width: 20), // spacedBy(20.dp)
           
           // 오른쪽: 텍스트 영역
+          
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min, // 👈 세로 방향 Hug 구현 [cite: 2026-01-02]
               children: [
+                // 👈 4. 주입받은 title 사용 [cite: 2026-02-13]
                 Text(
-                  '[프리미엄/인생핏!/면100] 답답함 없는, 리나 라운드 긴팔 가을 겨울 티셔츠 세...',
-                  style: AppTextStyles.ptdMedium(14).copyWith(height: 1.2),
+                  title,
+                  style: AppTextStyles.ptdMedium(14).copyWith(
+                    color: AppColors.black,
+                    height: 1.2,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 12), // 텍스트 간격 확보 [cite: 2026-02-13]
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    // 👈 5. 주입받은 price 사용 [cite: 2026-02-13]
                     Text(
-                      '199,900원',
-                      style: AppTextStyles.ptdBold(18),
+                      price,
+                      style: AppTextStyles.ptdBold(18).copyWith(color: AppColors.black),
                     ),
+                    // 👈 6. 주입받은 dateTag 사용 [cite: 2026-02-13]
                     Text(
-                      '13일 고민',
-                      style: AppTextStyles.ptdRegular(12).copyWith(color: Colors.grey),
+                      dateTag,
+                      style: AppTextStyles.ptdRegular(12).copyWith(color: AppColors.lightGrey),
                     ),
                   ],
                 ),

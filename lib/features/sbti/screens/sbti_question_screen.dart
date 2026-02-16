@@ -31,8 +31,6 @@ class SbtiQuestionScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final currentQ = questions[state.currentIndex];
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBackBar(

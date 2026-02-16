@@ -23,7 +23,8 @@ class InitialQuestionState {
   String get currentTitle => currentQuestion['q'] as String;
 
   // 현재 질문의 선택지들 (없을 수 있으므로 빈 리스트 처리)
-  List<String> get currentOptions => (currentQuestion['options'] as List<String>?) ?? [];
+  List<String> get currentOptions =>
+      (currentQuestion['options'] as List<String>?) ?? [];
 
   InitialQuestionState({
     this.currentIndex = 0,
@@ -95,16 +96,24 @@ class InitialQuestionNotifier extends StateNotifier<InitialQuestionState> {
     }
   }
 
-  // initial_question_provider.dart 내부
-void handleBack(BuildContext context) {
-  if (state.currentIndex == 0) {
-    // 첫 번째 질문이라면 화면 나감
-    context.go('pop');
-  } else {
-    // 그 외에는 이전 질문으로 이동
-    previousPage();
+  /// [개선] 다음 버튼 클릭 시 로직 통합
+  void handleNext({required VoidCallback onAllFinished}) {
+    if (state.currentIndex < state.questions.length - 1) {
+      nextPage();
+    } else {
+      state = state.copyWith(isFinished: true);
+      onAllFinished(); // 💡 내비게이션은 UI 레이어에서 처리
+    }
   }
-}
+
+  // initial_question_provider.dart 내부
+  void handleBack({required VoidCallback onExit}) {
+    if (state.currentIndex == 0) {
+      onExit(); // 첫 페이지면 화면 이탈
+    } else {
+      state = state.copyWith(currentIndex: state.currentIndex - 1);
+    }
+  }
 
   // 리셋 (필요시)
   void reset() => state = InitialQuestionState();

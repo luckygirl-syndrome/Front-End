@@ -35,8 +35,8 @@ class SbtiStartScreen extends ConsumerWidget {
                   const Spacer(),
 
                   TwoButtons(
-                    onDislike: () {context.go('/sbti_no_like');},
-                    onLike: () {context.go('/sbti_question');},
+                    onLeftPressed: () {context.go('/sbti_no_like');},
+                    onRightPressed: () {context.go('/sbti_question');},
                   ),
                   const SizedBox(height: 20),
                 ],

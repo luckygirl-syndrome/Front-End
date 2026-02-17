@@ -118,10 +118,10 @@ class _BottomActionButtons extends StatelessWidget {
       );
     }
     return TwoButtons(
-      onDislike: () => context.go('/initial_question_no_like'),
-      onLike: () => context.go('/initial_question'),
-      dislikeText: '이젠 힘들어요',
-      likeText: '좋아요',
+      onLeftPressed: () => context.go('/initial_question_no_like'),
+      onRightPressed: () => context.go('/initial_question'),
+      leftText: '이젠 힘들어요',
+      rightText: '좋아요',
     );
   }
 }

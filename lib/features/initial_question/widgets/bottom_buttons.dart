@@ -23,10 +23,10 @@ class BottomButtons extends StatelessWidget {
     if (type == 'choice') {
       // Q1: 버튼 2개 (여긴 없어요 / 좋아요)
       return TwoButtons(
-        onDislike: onAlternative ?? onNext,
-        onLike: onNext,
-        dislikeText: '여긴 없어요',
-        likeText: '좋아요',
+        onLeftPressed: onAlternative ?? onNext,
+        onRightPressed: onNext,
+        leftText: '여긴 없어요',
+        rightText: '좋아요',
       );
     } else {
       // Q2: 버튼 1개 (이 정도면 됐어요)

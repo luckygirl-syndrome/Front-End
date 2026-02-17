@@ -24,7 +24,7 @@ class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      title: title.isNotEmpty 
+      title: title!.isNotEmpty 
           ? Text(title!, style: AppTextStyles.ptdBold(20)) 
           : null,
       leadingWidth: 32 + 20 + 16,
@@ -47,3 +47,4 @@ class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(
     kToolbarHeight + (bottom?.preferredSize.height ?? 0),
   );
+}

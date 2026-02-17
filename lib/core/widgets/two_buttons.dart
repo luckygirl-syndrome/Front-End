@@ -1,38 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
-import 'app_button.dart';
+import 'package:ttobaba/core/widgets/app_button.dart'; // 👈 절대 경로 임포트 [cite: 2026-02-17]
 
 class TwoButtons extends StatelessWidget {
-  final VoidCallback onDislike;
-  final VoidCallback onLike;
-  final String dislikeText; // 왼쪽 버튼 텍스트 추가
-  final String likeText;    // 오른쪽 버튼 텍스트 추가
+  final VoidCallback onLeftPressed;  // 👈 명칭 변경 [cite: 2026-02-17]
+  final VoidCallback onRightPressed; // 👈 명칭 변경 [cite: 2026-02-17]
+  final String leftText;             // 👈 명칭 변경 [cite: 2026-02-17]
+  final String rightText;            // 👈 명칭 변경 [cite: 2026-02-17]
+  final Color? leftBackgroundColor;  // 👈 배경색 커스텀 추가 [cite: 2026-02-17]
+  final Color? rightBackgroundColor; // 👈 배경색 커스텀 추가 [cite: 2026-02-17]
+  final double gap;
+  final double borderRadius;
 
   const TwoButtons({
     super.key,
-    required this.onDislike,
-    required this.onLike,
-    this.dislikeText = '싫어요', // 기본값 설정
-    this.likeText = '좋아요',        // 기본값 설정
+    required this.onLeftPressed,
+    required this.onRightPressed,
+    this.leftText = '싫어요', // 기존 로직에 맞춰 기본값 변경 [cite: 2026-02-17]
+    this.rightText = '좋아요', 
+    this.leftBackgroundColor,
+    this.rightBackgroundColor,
+    this.gap = 20,
+    this.borderRadius = 12,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        // 1. 왼쪽 버튼 영역
         Expanded(
           child: AppButton(
-            text: dislikeText,
-            onPressed: onDislike,
-            backgroundColor: AppColors.secondaryMain, // 파란색 톤
+            text: leftText,
+            onPressed: onLeftPressed,
+            backgroundColor: leftBackgroundColor ?? AppColors.secondaryMain, 
+            borderRadius: borderRadius,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: gap),
         Expanded(
           child: AppButton(
-            text: likeText,
-            onPressed: onLike,
-            backgroundColor: AppColors.primaryMain, // 노란색 톤
+            text: rightText,
+            onPressed: onRightPressed,
+            backgroundColor: rightBackgroundColor ?? AppColors.primaryMain, 
+            borderRadius: borderRadius,
           ),
         ),
       ],

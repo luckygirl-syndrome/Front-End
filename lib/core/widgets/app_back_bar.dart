@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
   final int currentPage;
   final VoidCallback onBackPressed;
+  final double height;
 
   const AppBackBar({
     super.key,
+    this.title = "",
     required this.currentPage,
     required this.onBackPressed,
+    this.height = 52,
   });
 
   @override
@@ -17,12 +21,13 @@ class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      centerTitle: true,
+
+      leadingWidth: 32 + 20 + 16,
       leading: Container(
-        // 2. 왼쪽 여백을 32로 고정합니다.
         margin: const EdgeInsets.only(left: 32), 
         alignment: Alignment.centerLeft,
         child: InkWell(
-          // IconButton 대신 InkWell을 쓰면 기본 패딩 없이 위치를 잡기 더 편합니다.
           onTap: onBackPressed,
           child: const Icon(
             Icons.arrow_back_ios_new, 
@@ -31,9 +36,15 @@ class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
+
+      title: title.isNotEmpty 
+        ? Text(
+            title,
+            style: AppTextStyles.ptdBold(18).copyWith(color: AppColors.black),
+          ) 
+        : null,
     );
   }
-
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(height);
 }

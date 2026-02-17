@@ -1,6 +1,6 @@
-// lib/features/home/widgets/ttobaba/unreviewed_item_widget.dart
-
 import 'package:flutter/material.dart';
+import 'package:ttobaba/core/widgets/app_button.dart';
+import 'package:ttobaba/features/feedback/screens/feedback_screen.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 
@@ -94,16 +94,23 @@ class UnreviewedItemWidget extends StatelessWidget {
                             "구매한 지 18일 지남",
                             style: AppTextStyles.ptdRegular(10).copyWith(color: AppColors.black),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryMain,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              "평가하기",
-                              style: AppTextStyles.ptdMedium(10).copyWith(color: AppColors.white),
-                            ),
+                          
+                          // 👈 1. 기존 Container를 AppButton으로 교체합니다. [cite: 2026-02-17]
+                          AppButton(
+                            text: "평가하기",
+                            // 👈 2. 작은 버튼 형태를 위해 width를 64px로 고정합니다. [cite: 2026-02-13]
+                            width: 52, 
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            borderRadius: 4,
+                            // 👈 3. 텍스트 스타일을 시안에 맞춰 Medium/10으로 적용합니다. [cite: 2026-02-17]
+                            textStyle: AppTextStyles.ptdMedium(10), 
+                            onPressed: () {
+                              // 👈 4. 버튼 클릭 시 다음 화면으로 이동합니다. [cite: 2026-02-17]
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const FeedbackScreen()),
+                              );
+                            },
                           ),
                         ],
                       ),

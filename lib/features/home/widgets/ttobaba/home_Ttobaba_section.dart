@@ -53,6 +53,7 @@ class HomeTtobabaSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
                   children: [
+                    const SizedBox(height: 32),
                     _buildTitle(),
                     const SizedBox(height: 32),
                     _buildCharacterImage(),

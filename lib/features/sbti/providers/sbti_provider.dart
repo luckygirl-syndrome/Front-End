@@ -20,10 +20,11 @@ class SbtiNotifier extends StateNotifier<SbtiState> {
             scores: {'D': 0, 'N': 0, 'S': 0, 'A': 0, 'M': 0, 'T': 0}));
 
   void selectOption(String type) {
- // 점수 업데이트 로직
+    // 1. 기존 점수 복사 및 업데이트
     final newScores = Map<String, int>.from(state.scores);
     newScores[type] = (newScores[type] ?? 0) + 1;
 
+    // 2. 상태 업데이트 (인덱스 증가 + 새로운 점수)
     state = state.copyWith(
       currentIndex: state.currentIndex + 1,
       scores: newScores,

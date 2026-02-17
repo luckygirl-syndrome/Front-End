@@ -13,14 +13,44 @@ class SbtiQuestionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. 질문 완료 시 화면 이동 로직
-    ref.listen<SbtiState>(sbtiProvider, (previous, next) {
-      if (next.currentIndex >= 9) {
+    final state = ref.watch(sbtiProvider);
+    // 💡 리스너 대신 build 내부에서 상태를 체크합니다.
+  if (state.currentIndex >= 9) {
+    // 현재 프레임 렌더링이 끝난 뒤에 안전하게 실행되도록 예약합니다. [cite: 2026-02-17]
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+      // 💡 [추가] 로그 출력 로직
+      print('==== S-BTI 테스트 결과 로그 ====');
+      
+      // 각 쌍별로 백분율 계산
+      void logRatio(String top, String bottom, String label) {
+        int tScore = state.scores[top] ?? 0;
+        int bScore = state.scores[bottom] ?? 0;
+        int total = tScore + bScore;
+        
+        if (total > 0) {
+          double percent = (tScore / total) * 100;
+          print('$label: $top($percent%) vs $bottom(${100 - percent}%)');
+        } else {
+          print('$label: 데이터 없음');
+        }
+      }
+
+      logRatio('D', 'N', '유형 1 (도파민 vs 생존)');
+      logRatio('S', 'A', '유형 2 (사회자극 vs 미적자극)');
+      logRatio('M', 'T', '유형 3 (마이웨이 vs 유행)');
+      print('==============================');
+
+      final String? from = GoRouterState.of(context).uri.queryParameters['from'];
+      
+      // 중복 이동 방지를 위해 현재 경로를 확인하는 것이 좋습니다.
+      if (from == 'my') {
+        context.go('/my_page');
+      } else {
         context.go('/initial_question_start');
       }
-    });
-
-    final state = ref.watch(sbtiProvider);
+    }});
+  }
     final notifier = ref.read(sbtiProvider.notifier);
 
     // 질문 데이터 리스트
@@ -54,7 +84,7 @@ class SbtiQuestionScreen extends ConsumerWidget {
               // 💡 직접 만든 공통 위젯 재사용!
               // 회원가입 페이지와 동일한 룩앤필을 유지합니다.
               AppIndicator(
-                currentPage: state.currentIndex, 
+                currentPage: state.currentIndex,
                 totalPage: questions.length, // S-BTI 질문 개수(9개) 전달
               ),
               const SizedBox(height: 20),

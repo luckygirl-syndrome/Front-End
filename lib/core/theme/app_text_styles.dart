@@ -15,18 +15,18 @@ class AppTextStyles {
   static const String _ptd = 'Pretendard';
 
   // Pretendard - Thin (100)
-  static TextStyle ptdThin(double size) => TextStyle(
-    fontFamily: _ptd,
-    fontSize: size,
-    fontWeight: FontWeight.w100,
-  );
+  // static TextStyle ptdThin(double size) => TextStyle(
+  //   fontFamily: _ptd,
+  //   fontSize: size,
+  //   fontWeight: FontWeight.w100,
+  // );
 
-  // Pretendard - Light (300)
-  static TextStyle ptdLight(double size) => TextStyle(
-    fontFamily: _ptd,
-    fontSize: size,
-    fontWeight: FontWeight.w300,
-  );
+  // // Pretendard - Light (300)
+  // static TextStyle ptdLight(double size) => TextStyle(
+  //   fontFamily: _ptd,
+  //   fontSize: size,
+  //   fontWeight: FontWeight.w300,
+  // );
 
   // Pretendard - Regular (400)
   static TextStyle ptdRegular(double size) => TextStyle(
@@ -42,12 +42,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
   );
 
-  // Pretendard - SemiBold (600)
-  static TextStyle ptdSemiBold(double size) => TextStyle(
-    fontFamily: _ptd,
-    fontSize: size,
-    fontWeight: FontWeight.w600,
-  );
+  // // Pretendard - SemiBold (600)
+  // static TextStyle ptdSemiBold(double size) => TextStyle(
+  //   fontFamily: _ptd,
+  //   fontSize: size,
+  //   fontWeight: FontWeight.w600,
+  // );
 
   // Pretendard - Bold (700)
   static TextStyle ptdBold(double size) => TextStyle(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ttobaba/core/widgets/app_indicator.dart';
 
-import 'app_back_bar.dart';
+import 'app_backbar.dart';
 import '../theme/app_text_styles.dart';
 
 class QuestionBase extends StatelessWidget {
@@ -13,15 +13,15 @@ class QuestionBase extends StatelessWidget {
   final Widget? bottomButton; // (선택사항) 2, 3번 스크린의 하단 버튼
   final VoidCallback? onBackPressed;
 
-  const QuestionBase({
-    super.key,
-    required this.question,
-    required this.currentIndex,
-    required this.totalSteps,
-    required this.content,
-    this.bottomButton,
-    this.onBackPressed // 뒤로가기 로직을 외부에서 주입받음
-  });
+  const QuestionBase(
+      {super.key,
+      required this.question,
+      required this.currentIndex,
+      required this.totalSteps,
+      required this.content,
+      this.bottomButton,
+      this.onBackPressed // 뒤로가기 로직을 외부에서 주입받음
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +29,14 @@ class QuestionBase extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBackBar(
         currentPage: currentIndex,
-        onBackPressed: onBackPressed ?? () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/home'); // 더 이상 pop할 게 없으면 홈으로
-          }
-        },
+        onBackPressed: onBackPressed ??
+            () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home'); // 더 이상 pop할 게 없으면 홈으로
+              }
+            },
       ), // 기존 앱바 활용
       body: SafeArea(
         child: Padding(
@@ -49,7 +50,7 @@ class QuestionBase extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.ptdBold(24),
               ),
-              
+
               // [2] 컨텐츠 영역 (중앙 정렬)
               Expanded(
                 child: Center(child: content),
@@ -62,7 +63,7 @@ class QuestionBase extends StatelessWidget {
               ],
 
               // [4] 인디케이터
-              AppIndicator(currentPage :currentIndex, totalPage: totalSteps),
+              AppIndicator(currentPage: currentIndex, totalPage: totalSteps),
               const SizedBox(height: 20),
             ],
           ),

@@ -22,7 +22,7 @@ class SbtiStartScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   // ⭐ AppBar가 없으므로 상단 여백을 살짝 더 줍니다.
-                  const SizedBox(height: 38), 
+                  const SizedBox(height: 38),
                   Text(
                     '또바와 함께\n쇼핑 성향(S-BTI)을\n알아볼까요?',
                     textAlign: TextAlign.center,
@@ -31,12 +31,19 @@ class SbtiStartScreen extends ConsumerWidget {
 
                   const SizedBox(height: 144),
 
-                  Image.asset('assets/images/sbti_cat.png', height: 202,),
+                  Image.asset(
+                    'assets/images/sbti_cat.png',
+                    height: 202,
+                  ),
                   const Spacer(),
 
                   TwoButtons(
-                    onLeftPressed: () {context.go('/sbti_no_like');},
-                    onRightPressed: () {context.go('/sbti_question');},
+                    onLeftPressed: () {
+                      context.push('/sbti_no_like');
+                    },
+                    onRightPressed: () {
+                      context.push('/sbti_question');
+                    },
                   ),
                   const SizedBox(height: 20),
                 ],

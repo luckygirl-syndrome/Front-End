@@ -5,6 +5,7 @@ import '../../../core/theme/app_text_styles.dart';
 // lib/core/widgets/app_button.dart
 class AppButton extends StatelessWidget {
   final String text;
+  final String? title; // 1. 제목 파라미터 추가
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
@@ -20,6 +21,7 @@ class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
     required this.text,
+    this.title,
     required this.onPressed,
     this.backgroundColor,
     this.textColor,
@@ -41,6 +43,10 @@ class AppButton extends StatelessWidget {
     final TextStyle finalTextStyle =
         (textStyle ?? AppTextStyles.ptdBold(20)).copyWith(
       color: textStyle?.color ?? textColor ?? AppColors.white,
+    );
+    // 제목 스타일 (Bold 24)
+    final TextStyle titleStyle = AppTextStyles.ptdBold(24).copyWith(
+      color: textColor ?? AppColors.white,
     );
 
     return Container(
@@ -73,10 +79,19 @@ class AppButton extends StatelessWidget {
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           onPressed: onPressed,
-          child: Text(
-            text,
-            style: finalTextStyle,
-          ),
+          child: title != null
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title!, style: titleStyle),
+                    const SizedBox(height: 4),
+                    Text(text, style: finalTextStyle),
+                  ],
+                )
+              : Text(
+                  text,
+                  style: finalTextStyle,
+                ),
         ),
       ),
     );

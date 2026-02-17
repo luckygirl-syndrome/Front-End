@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ttobaba/features/feedback/providers/feedback_provider.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
-import 'package:ttobaba/core/widgets/app_back_bar.dart';
+import 'package:ttobaba/core/widgets/app_backbar.dart';
 import 'package:ttobaba/core/widgets/app_indicator.dart';
 import 'package:ttobaba/core/widgets/two_buttons.dart';
 import 'package:ttobaba/core/widgets/app_longtext_field.dart';
@@ -23,7 +24,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     if (currentState.currentIndex > 0) {
       ref.read(feedbackProvider.notifier).previousStep();
     } else {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -241,8 +242,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           leftText: "스킵할래요",
           rightText: "제출할래요",
           leftBackgroundColor: AppColors.lightGrey,
-          onLeftPressed: () => Navigator.pop(context),
-          onRightPressed: () => Navigator.pop(context),
+          onLeftPressed: () => context.pop(),
+          onRightPressed: () => context.pop(),
         ),
       ],
     );

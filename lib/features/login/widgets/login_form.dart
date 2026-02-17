@@ -47,7 +47,7 @@ class LoginForm extends ConsumerWidget {
                 : () async {
                     final success = await notifier.login();
                     if (success && context.mounted) {
-                      context.go('/sbti_start'); // 성공 시에만 이동
+                      context.push('/sbti_start'); // 성공 시에만 이동
                     }
                   }),
       ],

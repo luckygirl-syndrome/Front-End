@@ -115,6 +115,14 @@ class InitialQuestionNotifier extends StateNotifier<InitialQuestionState> {
     }
   }
 
+  // 완료 화면에서 다시 질문으로 돌아오기
+  void returnToQuestion() {
+    state = state.copyWith(
+      isFinished: false,
+      currentIndex: state.questions.length - 1, // 마지막 질문으로 이동
+    );
+  }
+
   // 리셋 (필요시)
   void reset() => state = InitialQuestionState();
 }

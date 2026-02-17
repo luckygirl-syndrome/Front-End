@@ -27,7 +27,12 @@ class _SignupPageContentState extends ConsumerState<SignupPageContent> {
     super.initState();
     // 이전 페이지에서 돌아왔을 때 데이터 복구를 위해 초기값 설정
     final state = ref.read(signupProvider);
-    final String initialValue = [state.name, state.email, state.password, state.confirmPassword][widget.index];
+    final String initialValue = [
+      state.name,
+      state.email,
+      state.password,
+      state.confirmPassword
+    ][widget.index];
     _controller = TextEditingController(text: initialValue);
   }
 
@@ -40,7 +45,7 @@ class _SignupPageContentState extends ConsumerState<SignupPageContent> {
   @override
   Widget build(BuildContext context) {
     // 가이드 아이템의 실시간 반영을 위해 watch
-    ref.watch(signupProvider); 
+    ref.watch(signupProvider);
     final notifier = ref.read(signupProvider.notifier);
 
     final void Function(String) updateFunc = [
@@ -53,23 +58,28 @@ class _SignupPageContentState extends ConsumerState<SignupPageContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.data['title']!, style: AppTextStyles.ptdBold(24).copyWith(color: AppColors.black)),
+        Text(widget.data['title']!,
+            style: AppTextStyles.ptdBold(24).copyWith(color: AppColors.black)),
         if (widget.data['subTitle'] != null) ...[
           const SizedBox(height: 8),
-          Text(widget.data['subTitle']!, style: AppTextStyles.ptdRegular(12).copyWith(color: AppColors.lightGrey)),
+          Text(widget.data['subTitle']!,
+              style: AppTextStyles.ptdRegular(12)
+                  .copyWith(color: AppColors.lightGrey)),
         ],
         const SizedBox(height: 78),
         AppTextField(
           hint: widget.data['hint']!,
           controller: _controller,
           obscureText: widget.index >= 2,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-          onChanged: updateFunc,
-          onSubmitted: (_) => notifier.next(() => context.go('/sbti_start')),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+          onSubmitted: (_) => notifier.next(() => context.push('/sbti_start')),
         ),
         const SizedBox(height: 16),
-        ...List<String>.from(widget.data['guides'] ?? []).asMap().entries.map((e) =>
-            SignupGuideItem(text: e.value, isValid: notifier.isGuideValid(widget.index, e.key))),
+        ...List<String>.from(widget.data['guides'] ?? []).asMap().entries.map(
+            (e) => SignupGuideItem(
+                text: e.value,
+                isValid: notifier.isGuideValid(widget.index, e.key))),
       ],
     );
   }

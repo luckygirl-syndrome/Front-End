@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +28,7 @@ class ProfileEditScreen extends ConsumerWidget {
         onBackPressed: () => context.pop(),
         // AppBackBar가 아래처럼 bottom 인자를 받을 수 있도록 선언되어 있다면
         bottom: const PreferredSize(
-          preferredSize:  Size.fromHeight(10.0),
+          preferredSize: Size.fromHeight(10.0),
           child: Divider(
             height: 1,
             thickness: 1,

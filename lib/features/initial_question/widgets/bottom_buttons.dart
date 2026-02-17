@@ -29,14 +29,8 @@ class BottomButtons extends StatelessWidget {
         rightText: '좋아요',
       );
     } else {
-      // Q2: 버튼 1개 (이 정도면 됐어요)
-      return SizedBox(
-        width: double.infinity,
-        child: AppButton(
-          text: '이 정도면 됐어요',
-          onPressed: onNext,
-        ),
-      );
+      // Q2: '이 정도면 됐어요' 버튼 숨김 (선택지 UI로 변경됨에 따라)
+      return const SizedBox.shrink();
     }
   }
 }

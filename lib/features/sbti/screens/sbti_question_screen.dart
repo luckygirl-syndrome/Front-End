@@ -14,50 +14,52 @@ class SbtiQuestionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(sbtiProvider);
-    // 💡 리스너 대신 build 내부에서 상태를 체크합니다.
-  if (state.currentIndex >= 9) {
-    // 현재 프레임 렌더링이 끝난 뒤에 안전하게 실행되도록 예약합니다. [cite: 2026-02-17]
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-      // 💡 [추가] 로그 출력 로직
-      print('==== S-BTI 테스트 결과 로그 ====');
-      
-      // 각 쌍별로 백분율 계산
-      void logRatio(String top, String bottom, String label) {
-        int tScore = state.scores[top] ?? 0;
-        int bScore = state.scores[bottom] ?? 0;
-        int total = tScore + bScore;
-        
-        if (total > 0) {
-          double percent = (tScore / total) * 100;
-          print('$label: $top($percent%) vs $bottom(${100 - percent}%)');
+    final notifier = ref.read(sbtiProvider.notifier);
+
+    // 💡 리스너: 상태 변경 시 1회만 실행됨
+    ref.listen(sbtiProvider, (prev, next) {
+      if (next.currentIndex >= 9 && (prev?.currentIndex ?? 0) < 9) {
+        // 💡 [추가] 로그 출력 로직
+        print('==== S-BTI 테스트 결과 로그 ====');
+
+        // 각 쌍별로 백분율 계산
+        void logRatio(String top, String bottom, String label) {
+          int tScore = next.scores[top] ?? 0;
+          int bScore = next.scores[bottom] ?? 0;
+          int total = tScore + bScore;
+
+          if (total > 0) {
+            double percent = (tScore / total) * 100;
+            print('$label: $top($percent%) vs $bottom(${100 - percent}%)');
+          } else {
+            print('$label: 데이터 없음');
+          }
+        }
+
+        logRatio('D', 'N', '유형 1 (도파민 vs 생존)');
+        logRatio('S', 'A', '유형 2 (사회자극 vs 미적자극)');
+        logRatio('M', 'T', '유형 3 (마이웨이 vs 유행)');
+        print('==============================');
+
+        final String? from =
+            GoRouterState.of(context).uri.queryParameters['from'];
+
+        if (from == 'my') {
+          context.push('/my_page');
         } else {
-          print('$label: 데이터 없음');
+          context.push('/initial_question_start');
         }
       }
-
-      logRatio('D', 'N', '유형 1 (도파민 vs 생존)');
-      logRatio('S', 'A', '유형 2 (사회자극 vs 미적자극)');
-      logRatio('M', 'T', '유형 3 (마이웨이 vs 유행)');
-      print('==============================');
-
-      final String? from = GoRouterState.of(context).uri.queryParameters['from'];
-      
-      // 중복 이동 방지를 위해 현재 경로를 확인하는 것이 좋습니다.
-      if (from == 'my') {
-        context.go('/my_page');
-      } else {
-        context.go('/initial_question_start');
-      }
-    }});
-  }
-    final notifier = ref.read(sbtiProvider.notifier);
+    });
 
     // 질문 데이터 리스트
     final questions = sbtiQuestions;
 
     // [수정] 인덱스 안전장치: 질문 완료 시점이면 더 이상 아래 로직을 타지 않음
     if (state.currentIndex >= questions.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) notifier.previousPage();
+      });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 

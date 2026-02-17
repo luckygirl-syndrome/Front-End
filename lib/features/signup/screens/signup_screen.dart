@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // 1. 공통 위젯들
-import '../../../core/widgets/app_back_bar.dart';
+import '../../../core/widgets/app_backbar.dart';
 
 // 3. 방금 만든 프로바이더
 import '../providers/signup_provider.dart';
@@ -45,7 +45,8 @@ class SignupScreen extends ConsumerWidget {
               SignupFooter(
                 currentPage: state.currentPage,
                 isPageValid: notifier.isCurrentPageValid(),
-                onNextPressed: () => notifier.next(() => context.push('/sbti_start')),
+                onNextPressed: () =>
+                    notifier.next(() => context.push('/sbti_start')),
               ),
             ],
           ),

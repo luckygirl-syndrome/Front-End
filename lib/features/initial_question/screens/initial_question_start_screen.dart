@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ttobaba/core/widgets/app_back_bar.dart';
+import 'package:ttobaba/core/widgets/app_backbar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
@@ -19,6 +19,18 @@ class InitialQuestionStartScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBackBar(
+        onBackPressed: () {
+          if (isFinished) {
+            // 완료 화면에서 뒤로가기: 다시 질문 화면으로 돌아감
+            ref.read(initialQuestionProvider.notifier).returnToQuestion();
+            context.push('/initial_question');
+          } else {
+            // 시작 화면에서 뒤로가기: 앱 종료 또는 이전 화면
+            context.pop();
+          }
+        },
+      ),
       body: Stack(
         children: [
           // 1. 배경 (그라데이션)
@@ -50,7 +62,12 @@ class _BackgroundLayout extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.white, AppColors.primaryMain, Colors.white],
+            colors: [
+              Colors.white,
+              Colors.white,
+              AppColors.primaryMain,
+              Colors.white
+            ],
             stops: [0.0, 0.35, 0.351, 0.9],
           ),
         ),
@@ -67,8 +84,8 @@ class _CharacterImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Image.asset(
-        isFinished 
-            ? 'assets/images/initial_question_cat_end.png' 
+        isFinished
+            ? 'assets/images/initial_question_cat_end.png'
             : 'assets/images/initial_question_cat.png',
         height: 96,
       ),
@@ -118,8 +135,8 @@ class _BottomActionButtons extends StatelessWidget {
       );
     }
     return TwoButtons(
-      onLeftPressed: () => context.go('/initial_question_no_like'),
-      onRightPressed: () => context.go('/initial_question'),
+      onLeftPressed: () => context.push('/initial_question_no_like'),
+      onRightPressed: () => context.push('/initial_question'),
       leftText: '이젠 힘들어요',
       rightText: '좋아요',
     );

@@ -42,15 +42,24 @@ class InitialQuestionScreen extends ConsumerWidget {
               const Spacer(),
 
               // 💡 핵심: 현재 타입에 맞는 입력 폼 (분리됨)
-              _QuestionInputForm(state: state, notifier: notifier),
+              // 💡 핵심: 현재 타입에 맞는 입력 폼 (분리됨)
+              _QuestionInputForm(
+                state: state,
+                notifier: notifier,
+                onNext: () => notifier.handleNext(
+                  onAllFinished: () => context.push('/initial_question_start'),
+                ),
+              ),
 
-              const Spacer(),
+              // 'choice' 타입일 때만 하단 스페이서 유지 (중앙 정렬)
+              // 'input' 타입일 때는 스페이서 제거 -> 하단 정렬 (BottomButtons 위로)
+              if (state.currentType == 'choice') const Spacer(),
 
               // --- [분리된 위젯 호출] 하단 버튼 영역 ---
               BottomButtons(
                 type: state.currentType,
                 onNext: () => notifier.handleNext(
-                  onAllFinished: () => context.go('/initial_question_start'),
+                  onAllFinished: () => context.push('/initial_question_start'),
                 ),
                 // '여긴 없어요' 클릭 시에도 추구미 입력으로 넘어감.
                 onAlternative: () => notifier.nextPage(),
@@ -86,11 +95,17 @@ class _QuestionHeader extends StatelessWidget {
 }
 
 /// [2] 타입별 입력 폼 판별 위젯
+/// [2] 타입별 입력 폼 판별 위젯
 class _QuestionInputForm extends StatelessWidget {
   final InitialQuestionState state;
   final InitialQuestionNotifier notifier;
+  final VoidCallback onNext; // 추가: 다음으로 넘어가는 콜백
 
-  const _QuestionInputForm({required this.state, required this.notifier});
+  const _QuestionInputForm({
+    required this.state,
+    required this.notifier,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +117,11 @@ class _QuestionInputForm extends StatelessWidget {
         onToggle: notifier.toggleMall,
       );
     }
-    return ChugumiInput(onChanged: notifier.updateChugumi);
+    // ChugumiInput 사용 시 onNext 전달
+    return ChugumiInput(
+      initialValue: state.chugumiText,
+      onChanged: notifier.updateChugumi,
+      onNext: onNext,
+    );
   }
 }

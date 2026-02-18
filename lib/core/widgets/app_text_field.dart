@@ -159,10 +159,7 @@ class _AppTextFieldState extends State<AppTextField> {
       child: TextField(
         controller: _internalController,
         onSubmitted: widget.onSubmitted,
-        onChanged: (val) {
-          print('DEBUG: AppTextField internal onChanged: $val');
-          if (widget.onChanged != null) widget.onChanged!(val);
-        },
+        onChanged: widget.onChanged,
         obscureText: _isObscured,
         textAlignVertical: TextAlignVertical.center, // 텍스트 수직 중앙 정렬
         style: finalTextStyle,

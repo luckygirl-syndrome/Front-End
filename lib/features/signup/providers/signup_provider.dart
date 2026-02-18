@@ -57,11 +57,7 @@ class SignupNotifier extends StateNotifier<SignupState> {
 
   SignupNotifier(this.ref) : super(SignupState());
 
-  void updateName(String val) {
-    print('DEBUG: updateName called with "$val"');
-    state = state.copyWith(name: val);
-    print('DEBUG: isNameValid: ${state.isNameValid}');
-  }
+  void updateName(String val) => state = state.copyWith(name: val);
 
   void updateEmail(String val) => state = state.copyWith(email: val);
   void updatePassword(String val) => state = state.copyWith(password: val);

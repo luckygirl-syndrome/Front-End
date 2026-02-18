@@ -19,10 +19,6 @@ class SignupScreen extends ConsumerWidget {
     final state = ref.watch(signupProvider);
     final notifier = ref.read(signupProvider.notifier);
 
-    // DEBUG LOG
-    print(
-        'DEBUG: SignupScreen build. Name="${state.name}", Valid=${notifier.isCurrentPageValid()}');
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBackBar(

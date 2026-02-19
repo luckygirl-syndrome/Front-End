@@ -8,9 +8,11 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_navbar.dart';
 import '../provider/my_page_state.dart';
+import '../provider/profile_provider.dart';
 import '../widgets/closet_stat_card.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/sbti_result_card.dart';
+
 import 'package:ttobaba/features/sbti/providers/sbti_provider.dart'; // 👈 경로에 맞춰 추가
 
 class MyPageScreen extends ConsumerWidget {
@@ -18,37 +20,45 @@ class MyPageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 💡 iOS의 getProfileInfo() 결과를 실시간 감시
+    final profileAsync = ref.watch(profileDataProvider);
+    final personaAsync = ref.watch(personaDataProvider);
     final state = ref.watch(myPageProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 배경 노란색 레이어
-          _buildBackgroundYellow(context),
+      body: profileAsync.when(
+        // ✅ 데이터 로드 성공 (iOS의 .success 케이스)
+        data: (profile) => Stack(
+          children: [
+            // 배경 노란색 레이어
+            _buildBackgroundYellow(context),
 
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                // 1. 헤더 영역 (프로필) [cite: 2026-02-16]
-                ProfileHeader(state: state),
-
-                // 2. 하단 콘텐츠 영역 (S-BTI, 옷장) [cite: 2026-02-16]
-                _buildMainContent(context, state, ref),
-              ],
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // 1. 헤더 영역 (프로필) [cite: 2026-02-16]
+                  ProfileHeader(
+                    profile: profile,
+                    description: personaAsync.value?.description,
+                  ),
+                  // 2. 하단 콘텐츠 영역 (S-BTI, 옷장) [cite: 2026-02-16]
+                  _buildMainContent(context, state, ref),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        // ✅ 로딩 중 (iOS의 startLoading())
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("에러: $err")),
       ),
       bottomNavigationBar: AppNavbar(
         currentIndex: 2,
         onTap: (index) {
-          if (index == 0) {
-            context.push('/chat_list');
-          } else if (index == 1) {
-            context.push('/home');
-          }
+          if (index == 0) context.go('/chat');
+          if (index == 1) context.go('/home');
         },
       ),
     );
@@ -73,51 +83,54 @@ class MyPageScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 30),
+
           const Divider(height: 2, color: AppColors.paleGrey),
+
           const SizedBox(height: 30),
 
-          // 1. S-BTI & 나의 취향 섹션 (좌우 패딩 적용)
+          // 2. 여기서부터는 다시 좌우 여백이 필요하므로 Padding으로 감쌉니다. [cite: 2026-02-16]
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // S-BTI 섹션
                 _buildSbtiSection(context, ref),
+
                 const SizedBox(height: 40),
-                _buildMyTasteSection(context, ref),
+
+                // 옷장 섹션
+                _buildClosetSection(state),
+
                 const SizedBox(height: 40),
               ],
             ),
           ),
-
-          // 2. 구분선 (Full Width)
-          const Divider(height: 1, color: AppColors.paleGrey),
-          const SizedBox(height: 40),
-
-          // 3. 나의 옷장 섹션
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: _buildClosetSection(state),
-          ),
-          const SizedBox(height: 40),
         ],
       ),
     );
   }
 
-  // S-BTI 섹션 상세
+// S-BTI 섹션 상세
   Widget _buildSbtiSection(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 💡 Row를 사용하여 타이틀과 버튼을 양 끝 배치
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text('나의 S-BTI', style: AppTextStyles.ptdBold(20)),
+
+            // 다시 설정하기 버튼
             GestureDetector(
+              // 마이페이지 (MyPageScreen.dart) 내부
               onTap: () {
+                // 1. 기존의 sbtiProvider 상태(currentIndex 등)를 완전히 초기화 [cite: 2026-02-17]
                 ref.invalidate(sbtiProvider);
+
+                // 2. 깨끗한 상태에서 'my' 파라미터만 들고 이동 [cite: 2026-02-17]
                 context.push('/sbti_question?from=my');
               },
               child: Row(
@@ -125,124 +138,24 @@ class MyPageScreen extends ConsumerWidget {
                   Text(
                     '다시 설정하기',
                     style: AppTextStyles.ptdRegular(12).copyWith(
-                      color: AppColors.grey,
+                      color: AppColors.darkerGrey, // 시안의 연한 회색 느낌
                     ),
                   ),
                   const SizedBox(width: 4),
                   const Icon(
                     Icons.arrow_forward_ios,
                     size: 12,
-                    color: AppColors.grey,
+                    color: Color(0xFF9E9E9E),
                   ),
                 ],
               ),
             ),
           ],
         ),
+
         const SizedBox(height: 16),
         const SbtiResultCard(),
       ],
-    );
-  }
-
-  // [MODIFY] 나의 취향 섹션
-  Widget _buildMyTasteSection(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 1. 헤더 영역 (나의 취향 + 다시 설정하기)
-        Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 0.0), // 헤더 좌우 여백 미세 조정
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('나의 취향', style: AppTextStyles.ptdBold(20)),
-              GestureDetector(
-                onTap: () {
-                  context.push('/initial_question_start');
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      '다시 설정하기',
-                      style: AppTextStyles.ptdRegular(12).copyWith(
-                        color: AppColors.grey,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 12,
-                      color: AppColors.grey,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20), // 헤더와 카드 사이 간격
-
-        // 2. 쇼핑몰 카드
-        _buildTasteCard(
-          title: '내가 자주 이용하는 쇼핑몰',
-          tags: ['무신사', '에이블리', '지그재그'],
-        ),
-
-        const SizedBox(height: 12), // 카드 사이 간격
-
-        // 3. 추구미 카드
-        _buildTasteCard(
-          title: '나의 추구미',
-          tags: ['모리걸'],
-        ),
-      ],
-    );
-  }
-
-  // [NEW] 공통 카드 위젯 (하얀색 박스 스타일)
-  Widget _buildTasteCard({required String title, required List<String> tags}) {
-    return Container(
-      width: double.infinity, // 가로 꽉 채우기
-      padding: const EdgeInsets.all(20), // 내부 여백 20px (시안 기준)
-      decoration: BoxDecoration(
-        color: Colors.white, // 하얀색 배경
-        borderRadius: BorderRadius.circular(12), // 둥근 모서리
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppTextStyles.ptdBold(16)),
-          const SizedBox(height: 12), // 제목과 태그 사이 간격
-          Wrap(
-            spacing: 8, // 태그 옆 간격
-            runSpacing: 8, // 태그 줄바꿈 간격
-            children: tags.map((tag) => _buildTag(tag)).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // [CHECK] 태그 디자인 (노란색 배경)
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primaryMain, // 시안의 노란색
-        borderRadius: BorderRadius.circular(4), // 태그 모서리 둥글기 (조절 가능)
-      ),
-      child: Text(
-        text,
-        style: AppTextStyles.ptdMedium(12).copyWith(color: Colors.white),
-      ),
     );
   }
 

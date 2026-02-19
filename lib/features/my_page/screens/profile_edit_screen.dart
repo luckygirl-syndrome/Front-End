@@ -52,18 +52,10 @@ class ProfileEditScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             AppButton(
               text: '이거로 할래요',
-              onPressed: notifier.isValid
-                  ? () {
-                      // 1. 현재 설정한 닉네임과 이미지 인덱스 가져오기 [cite: 2026-02-17]
-                      final currentNickname = state.nickname;
-
-                      // 2. profile 업데이트 [cite: 2026-02-17]
-                      ref
-                          .read(profileProvider.notifier)
-                          .updateNickname(currentNickname);
-
-                      // 3. 저장 완료 로그 (선택사항) [cite: 2026-02-17]
-                      print('저장 완료: $currentNickname');
+              onPressed: (notifier.isValid)
+                  ? () async {
+                      // 💡 Screen에서는 딱 이 호출만 합니다.
+                      await ref.read(profileProvider.notifier).saveProfile();
                     }
                   : null,
               textStyle: AppTextStyles.ptdBold(16),
@@ -84,12 +76,10 @@ class ProfileEditScreen extends ConsumerWidget {
               // 2. 텍스트 색상도 선택 여부에 따라 조절하면 더 예뻐요 (선택사항)
               textColor: isImageSelected ? Colors.white : Colors.grey,
 
-              onPressed: isImageSelected
-                  ? () {
-                      final currentImageIndex = state.selectedImageIndex;
-                      // 3. 사진 업데이트 전용 함수 호출 (updateNickname -> updateProfileImage 등)
-                      notifier.updateImage(currentImageIndex);
-                      print('프사 변경 완료: $currentImageIndex');
+              onPressed: (notifier.isValid)
+                  ? () async {
+                      // 💡 Screen에서는 딱 이 호출만 합니다.
+                      await ref.read(profileProvider.notifier).saveProfile();
                     }
                   : null,
               textStyle: AppTextStyles.ptdBold(16),

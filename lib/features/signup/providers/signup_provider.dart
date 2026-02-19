@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 // State는 순수하게 입력된 텍스트 값과 상태 정보만 들고있는게 좋음
 class SignupState {
   final int currentPage;
@@ -58,7 +57,6 @@ class SignupNotifier extends StateNotifier<SignupState> {
   SignupNotifier(this.ref) : super(SignupState());
 
   void updateName(String val) => state = state.copyWith(name: val);
-
   void updateEmail(String val) => state = state.copyWith(email: val);
   void updatePassword(String val) => state = state.copyWith(password: val);
   void updateConfirmPassword(String val) =>

@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:ttobaba/features/my_page/screens/my_page_screen.dart';
-import 'package:ttobaba/features/profile/screens/profile_edit_screen.dart';
+import 'package:ttobaba/features/my_page/screens/profile_edit_screen.dart';
 import '../../features/initial_question/screens/initial_question_no_like_screen.dart';
 import '../../features/initial_question/screens/initial_question_screen.dart';
 import '../../features/initial_question/screens/initial_question_start_screen.dart';

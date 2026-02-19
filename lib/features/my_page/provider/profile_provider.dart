@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/profile_service.dart';
-import '../models/profile_model.dart';
+
+import '../../../core/network/dio_provider.dart';
 import '../models/persona_model.dart';
-import '../../../core/network/dio_provider.dart'; // 아까 만든 공통 Dio
+import '../models/profile_model.dart';
+import '../services/profile_service.dart'; // 아까 만든 공통 Dio
 // ... 상단 import 생략
 
 // 1. 서비스 공급자 (Dio 주입)

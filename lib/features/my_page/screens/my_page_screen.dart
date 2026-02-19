@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_navbar.dart';
 import '../provider/my_page_state.dart';
+import '../provider/profile_provider.dart';
 import '../widgets/closet_stat_card.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/sbti_result_card.dart';
@@ -18,28 +19,40 @@ class MyPageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 💡 iOS의 getProfileInfo() 결과를 실시간 감시
+    final profileAsync = ref.watch(profileDataProvider);
+    final personaAsync = ref.watch(personaDataProvider);
     final state = ref.watch(myPageProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 배경 노란색 레이어
-          _buildBackgroundYellow(context),
+      body: profileAsync.when(
+        // ✅ 데이터 로드 성공
+        data: (profile) => Stack(
+          children: [
+            // 배경 노란색 레이어
+            _buildBackgroundYellow(context),
 
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                // 1. 헤더 영역 (프로필) [cite: 2026-02-16]
-                ProfileHeader(state: state),
-
-                // 2. 하단 콘텐츠 영역 (S-BTI, 옷장) [cite: 2026-02-16]
-                _buildMainContent(context, state, ref),
-              ],
+            SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // 1. 헤더 영역 (프로필)
+                  ProfileHeader(
+                    profile: profile,
+                    description: personaAsync.value?.description,
+                  ),
+                  // 2. 하단 콘텐츠 영역
+                  _buildMainContent(context, state, ref),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        // ✅ 로딩 중
+        loading: () => const Center(child: CircularProgressIndicator()),
+        // ✅ 에러 발생
+        error: (err, stack) => Center(child: Text("에러: $err")),
       ),
       bottomNavigationBar: AppNavbar(
         currentIndex: 2,
@@ -53,6 +66,7 @@ class MyPageScreen extends ConsumerWidget {
       ),
     );
   }
+
 
   // --- Private 빌더 메서드들 ---
 

@@ -211,7 +211,7 @@ class HomeTtobabaSection extends ConsumerWidget {
                 color: AppColors.secondaryMain), // medium 16 [cite: 2026-02-13]
           ),
           Text(
-            "${formattedAmount}원",
+            "$formattedAmount원",
             style: AppTextStyles.ptdBold(24).copyWith(
                 color: AppColors.secondaryMain), // bold 24 [cite: 2026-02-13]
           ),
@@ -226,11 +226,11 @@ class HomeTtobabaSection extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: _buildStatItem("지난 3달 동안\n나눈 대화", "${recentCount}건"),
+          child: _buildStatItem("지난 3달 동안\n나눈 대화", "$recentCount건"),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildStatItem("지금까지\n나눈 대화", "${totalCount}건"),
+          child: _buildStatItem("지금까지\n나눈 대화", "$totalCount건"),
         ),
       ],
     );

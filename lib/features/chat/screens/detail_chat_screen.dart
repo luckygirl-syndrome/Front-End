@@ -205,7 +205,7 @@ class DetailChatScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        "${formattedPrice}원",
+                        "$formattedPrice원",
                         style: AppTextStyles.ptdBold(20),
                       ),
                     ],

@@ -73,8 +73,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const isImageSelected = true; // 항상 선택된 상태로 간주 (기본값이 있으므로)
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBackBar(
@@ -123,9 +121,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
             const SizedBox(height: 24),
             AppButton(
               text: '이거로 할래요',
-              backgroundColor:
-                  isImageSelected ? AppColors.primaryMain : AppColors.paleGrey,
-              textColor: isImageSelected ? AppColors.white : AppColors.grey,
+              backgroundColor: AppColors.primaryMain,
+              textColor: AppColors.white,
               onPressed: _nicknameController.text.isNotEmpty ? _onSave : null,
               textStyle: AppTextStyles.ptdBold(16),
               borderRadius: 4,

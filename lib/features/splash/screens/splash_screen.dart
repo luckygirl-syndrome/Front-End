@@ -30,6 +30,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final storage = ref.read(secureStorageProvider);
     final token = await storage.read(key: 'access_token');
 
+    if (!mounted) return;
+
     // 3. 이동
     if (token != null && token.isNotEmpty) {
       context.go('/home');

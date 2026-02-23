@@ -93,8 +93,21 @@ GoRouter createAppRouter({String initialLocation = '/splash'}) {
       GoRoute(
         path: '/detail_chat',
         builder: (context, state) {
-          final status = state.extra as ItemStatus? ?? ItemStatus.considering;
-          return DetailChatScreen(status: status);
+          ItemStatus status = ItemStatus.considering;
+          Map<String, dynamic>? productData;
+
+          if (state.extra is ItemStatus) {
+            status = state.extra as ItemStatus;
+          } else if (state.extra is Map<String, dynamic>) {
+            final map = state.extra as Map<String, dynamic>;
+            status = map['status'] as ItemStatus? ?? ItemStatus.considering;
+            productData = map['product_data'] as Map<String, dynamic>?;
+          }
+
+          return DetailChatScreen(
+            status: status,
+            productData: productData,
+          );
         },
       ),
       // 피드백

@@ -1,25 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'chugume_provider.dart';
+part of 'dashboard_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chugumeHash() => r'd6e24e3c04601c26494585d946ed36d10897e29e';
+String _$dashboardHash() => r'a8e1aefad7141e758b05449e2496610af0540ffc';
 
-/// See also [Chugume].
-@ProviderFor(Chugume)
-final chugumeProvider =
-    AutoDisposeAsyncNotifierProvider<Chugume, ChugumeType?>.internal(
-  Chugume.new,
-  name: r'chugumeProvider',
+/// See also [Dashboard].
+@ProviderFor(Dashboard)
+final dashboardProvider =
+    AutoDisposeAsyncNotifierProvider<Dashboard, Map<String, dynamic>>.internal(
+  Dashboard.new,
+  name: r'dashboardProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$chugumeHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$dashboardHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$Chugume = AutoDisposeAsyncNotifier<ChugumeType?>;
+typedef _$Dashboard = AutoDisposeAsyncNotifier<Map<String, dynamic>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

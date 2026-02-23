@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ttobaba/features/chat/repositories/chat_repository.dart';
 
 // 1. 채팅 상태 모델
 class ChatState {
@@ -74,6 +76,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
       chatList: dummyChats,
       isLoading: false,
     );
+  }
+
+  Future<bool> startChat(String productUrl) async {
+    try {
+      final repository = ref.read(chatRepositoryProvider);
+      await repository.startChat(productUrl);
+      return true;
+    } catch (e) {
+      debugPrint("❌ [Start Chat] Error: $e");
+      return false;
+    }
+  }
+
+  Future<bool> finalizeSurvey(int q1, int q2, int q3, int qc) async {
+    try {
+      final repository = ref.read(chatRepositoryProvider);
+      await repository.finalizeSurvey(q1: q1, q2: q2, q3: q3, qc: qc);
+      return true;
+    } catch (e) {
+      debugPrint("❌ [Finalize Survey] Error: $e");
+      return false;
+    }
   }
 }
 

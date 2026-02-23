@@ -6,7 +6,7 @@ part of 'shop_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$favoriteShopsHash() => r'e23f194092f664db5ea62fdd35fff32a48645e60';
+String _$favoriteShopsHash() => r'6fff56ab2dcc69eb63c4bb4ad7d065cf1002420c';
 
 /// See also [FavoriteShops].
 @ProviderFor(FavoriteShops)

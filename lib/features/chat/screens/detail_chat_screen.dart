@@ -6,12 +6,16 @@ import 'package:ttobaba/core/widgets/app_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ttobaba/features/chat/widgets/chat_item.dart';
 
+import 'package:intl/intl.dart';
+
 class DetailChatScreen extends ConsumerWidget {
   final ItemStatus status;
+  final Map<String, dynamic>? productData;
 
   const DetailChatScreen({
     super.key,
     this.status = ItemStatus.considering,
+    this.productData,
   });
 
   @override
@@ -104,6 +108,12 @@ class DetailChatScreen extends ConsumerWidget {
     Color badgeTextColor = AppColors.white;
     Border? badgeBorder;
 
+    final name = productData?['product_name'] ?? "상품이름 없음";
+    final brand = productData?['brand'] ?? "브랜드 없음";
+    final price = productData?['price'] ?? 0;
+    final formattedPrice = NumberFormat('#,###').format(price);
+    final imageUrl = productData?['product_img'];
+
     switch (status) {
       case ItemStatus.considering:
         badgeText = '고민 중';
@@ -130,12 +140,19 @@ class DetailChatScreen extends ConsumerWidget {
           // 1. 왼쪽 상품 이미지 (80x80 고정) [cite: 2026-02-16]
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/products/product_sample.png',
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    'assets/images/products/product_sample.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 16),
 
@@ -153,12 +170,12 @@ class DetailChatScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "에이블리",
+                        brand,
                         style: AppTextStyles.ptdBold(12)
                             .copyWith(color: AppColors.black),
                       ),
                       Text(
-                        "❤️기모선택❤️찰랑 하이웨스트 와이드 롱팬츠",
+                        name,
                         style: AppTextStyles.ptdRegular(12),
                         textAlign: TextAlign.right,
                         maxLines: 2,
@@ -188,7 +205,7 @@ class DetailChatScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        "22,200원",
+                        "${formattedPrice}원",
                         style: AppTextStyles.ptdBold(20),
                       ),
                     ],

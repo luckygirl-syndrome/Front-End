@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/core/widgets/app_button.dart';
@@ -8,6 +9,9 @@ import 'package:ttobaba/core/widgets/link_input_popup.dart';
 import 'package:ttobaba/features/home/widgets/ttobaba/unreviewed_item_widget.dart';
 import 'package:ttobaba/features/products/providers/product_provider.dart';
 import 'package:ttobaba/features/my_page/providers/user_provider.dart';
+import 'package:ttobaba/features/home/providers/dashboard_provider.dart';
+import 'package:ttobaba/features/chat/widgets/chat_item.dart';
+import 'package:ttobaba/features/chat/providers/chat_provider.dart';
 
 class HomeTtobabaSection extends ConsumerWidget {
   final bool showReviewWidget;
@@ -75,13 +79,30 @@ class HomeTtobabaSection extends ConsumerWidget {
               // 👈 4. 하단 그룹도 각각 32px 패딩 적용 및 하단 여백 40px 추가 [cite: 2026-02-17]
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
-                child: Column(
-                  children: [
-                    _buildSavingCard(),
-                    const SizedBox(height: 12),
-                    _buildChatNumCard(),
-                  ],
-                ),
+                child: Consumer(builder: (context, ref, child) {
+                  final dashboardAsync = ref.watch(dashboardProvider);
+                  return dashboardAsync.when(
+                    data: (data) => Column(
+                      children: [
+                        _buildSavingCard(data['saved_amount'] ?? 0),
+                        const SizedBox(height: 12),
+                        _buildChatNumCard(
+                          data['recent_chat_count'] ?? 0,
+                          data['total_chat_count'] ?? 0,
+                        ),
+                      ],
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, st) => Column(
+                      children: [
+                        _buildSavingCard(0),
+                        const SizedBox(height: 12),
+                        _buildChatNumCard(0, 0),
+                      ],
+                    ),
+                  );
+                }),
               )
             ],
           ),
@@ -138,8 +159,14 @@ class HomeTtobabaSection extends ConsumerWidget {
               await ref.read(productParseProvider.notifier).parseProduct(url);
 
           if (result != null && context.mounted) {
-            // TODO: 분석 결과를 detail_chat 화면으로 전달
-            context.push('/detail_chat');
+            // 파싱 완료 후 백엔드에 채팅 생성(DB 적재) 알림
+            ref.read(chatProvider.notifier).startChat(url);
+
+            // 분석 결과를 detail_chat 화면으로 전달
+            context.push('/detail_chat', extra: {
+              'status': ItemStatus.considering,
+              'product_data': result,
+            });
           }
         }
       },
@@ -156,7 +183,8 @@ class HomeTtobabaSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildSavingCard() {
+  Widget _buildSavingCard(int amount) {
+    final formattedAmount = NumberFormat('#,###').format(amount);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
@@ -183,7 +211,7 @@ class HomeTtobabaSection extends ConsumerWidget {
                 color: AppColors.secondaryMain), // medium 16 [cite: 2026-02-13]
           ),
           Text(
-            "732,500원",
+            "${formattedAmount}원",
             style: AppTextStyles.ptdBold(24).copyWith(
                 color: AppColors.secondaryMain), // bold 24 [cite: 2026-02-13]
           ),
@@ -192,17 +220,17 @@ class HomeTtobabaSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildChatNumCard() {
+  Widget _buildChatNumCard(int recentCount, int totalCount) {
     return Row(
       // 두 카드 사이의 간격 12dp를 유지하면서 배치합니다. [cite: 2026-02-13]
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: _buildStatItem("지난 3달 동안\n나눈 대화", "8건"),
+          child: _buildStatItem("지난 3달 동안\n나눈 대화", "${recentCount}건"),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildStatItem("지금까지\n나눈 대화", "41건"),
+          child: _buildStatItem("지금까지\n나눈 대화", "${totalCount}건"),
         ),
       ],
     );

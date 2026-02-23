@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ttobaba/core/widgets/app_indicator.dart';
 
 import 'app_backbar.dart';
+import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class QuestionBase extends StatelessWidget {
@@ -26,7 +27,7 @@ class QuestionBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBackBar(
         currentPage: currentIndex,
         onBackPressed: onBackPressed ??

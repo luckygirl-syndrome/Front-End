@@ -10,7 +10,8 @@ class AppTopbar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       width: double.infinity, // Modifier.width(390.dp) -> Fill 너비 반영
       height: 48, // Modifier.height(47.99961.dp) 반영
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12), // Modifier.padding 반영
+      padding: const EdgeInsets.symmetric(
+          horizontal: 32, vertical: 12), // Modifier.padding 반영
       decoration: const BoxDecoration(
         color: AppColors.white,
       ),
@@ -20,9 +21,9 @@ class AppTopbar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           // 왼쪽: 로고 이미지
           SvgPicture.asset(
-            'assets/images/logo.svg', // 파일 확장자 변경 (.svg)
-            height: 24,               // 높이 유지
-            fit: BoxFit.contain,      // fit 유지
+            'assets/images/logos/logo.svg', // 파일 확장자 변경 (.svg)
+            height: 24, // 높이 유지
+            fit: BoxFit.contain, // fit 유지
             // 주의: SvgPicture.asset은 Image.asset과 동일한 방식의 errorBuilder를 지원하지 않습니다.
             // SVG 파일이 자산(assets)에 확실히 포함되어 있는지 확인해주세요.
           ),

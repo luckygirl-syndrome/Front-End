@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ttobaba/core/theme/app_colors.dart';
-import 'package:ttobaba/core/theme/app_text_styles.dart';
-import 'package:ttobaba/core/widgets/app_button.dart';
 
 import '../../../core/widgets/two_buttons.dart';
 

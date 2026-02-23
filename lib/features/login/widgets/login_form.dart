@@ -19,9 +19,9 @@ class LoginForm extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _Label('아이디'),
+        const _Label('이메일'),
         AppTextField(
-          hint: '아이디를 입력해주세요',
+          hint: '이메일을 입력해주세요',
           onChanged: notifier.updateEmail,
           textStyle: AppTextStyles.ptdRegular(12),
           hintStyle: AppTextStyles.ptdRegular(12),
@@ -47,7 +47,7 @@ class LoginForm extends ConsumerWidget {
                 : () async {
                     final success = await notifier.login();
                     if (success && context.mounted) {
-                      context.push('/sbti_start'); // 성공 시에만 이동
+                      context.go('/home'); // 로그인 성공 시 홈으로 이동
                     }
                   }),
       ],

@@ -18,11 +18,11 @@ class AppNavbar extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       width: double.infinity, // 390 고정 대신 화면 너비 꽉 채우기
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Color(0x261C1C1C), // 투명도 약 15%의 그림자
+            color: AppColors.black.withValues(alpha: 0.15), // 투명도 약 15%의 그림자
             blurRadius: 12,
           ),
         ],

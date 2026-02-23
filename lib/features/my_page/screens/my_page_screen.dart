@@ -5,14 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_navbar.dart';
 import '../provider/my_page_state.dart';
-import '../provider/profile_provider.dart';
+// import '../provider/profile_provider.dart'; // Deprecated
 import '../widgets/closet_stat_card.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/sbti_result_card.dart';
-import 'package:ttobaba/features/sbti/providers/sbti_provider.dart'; // 👈 경로에 맞춰 추가
+import 'package:ttobaba/features/sbti/providers/persona_provider.dart';
+import 'package:ttobaba/features/my_page/providers/user_provider.dart';
+import 'package:ttobaba/features/sbti/providers/sbti_provider.dart';
+import 'package:ttobaba/features/my_page/providers/shop_provider.dart';
+import 'package:ttobaba/features/my_page/providers/chugume_provider.dart';
+import 'package:ttobaba/features/initial_question/provider/initial_question_provider.dart';
+import 'package:ttobaba/features/my_page/providers/closet_provider.dart';
 
 class MyPageScreen extends ConsumerWidget {
   const MyPageScreen({super.key});
@@ -20,35 +25,38 @@ class MyPageScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 💡 iOS의 getProfileInfo() 결과를 실시간 감시
-    final profileAsync = ref.watch(profileDataProvider);
-    final personaAsync = ref.watch(personaDataProvider);
+    final userAsync = ref.watch(userProvider);
+    final personaAsync = ref.watch(personaStateProvider);
     final state = ref.watch(myPageProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: profileAsync.when(
+      backgroundColor: AppColors.white,
+      body: userAsync.when(
         // ✅ 데이터 로드 성공
-        data: (profile) => Stack(
-          children: [
-            // 배경 노란색 레이어
-            _buildBackgroundYellow(context),
+        data: (profile) {
+          if (profile == null) return const Center(child: Text("프로필 정보 없음"));
+          return Stack(
+            children: [
+              // 배경 노란색 레이어
+              _buildBackgroundYellow(context),
 
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  // 1. 헤더 영역 (프로필)
-                  ProfileHeader(
-                    profile: profile,
-                    description: personaAsync.value?.description,
-                  ),
-                  // 2. 하단 콘텐츠 영역
-                  _buildMainContent(context, state, ref),
-                ],
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // 1. 헤더 영역 (프로필)
+                    ProfileHeader(
+                      profile: profile,
+                      personaType: personaAsync.value?.personaType,
+                    ),
+                    // 2. 하단 콘텐츠 영역
+                    _buildMainContent(context, state, ref),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
         // ✅ 로딩 중
         loading: () => const Center(child: CircularProgressIndicator()),
         // ✅ 에러 발생
@@ -67,7 +75,6 @@ class MyPageScreen extends ConsumerWidget {
     );
   }
 
-
   // --- Private 빌더 메서드들 ---
 
   // 상단 오버스크롤 배경 [cite: 2026-02-16]
@@ -82,7 +89,7 @@ class MyPageScreen extends ConsumerWidget {
       BuildContext context, MyPageState state, WidgetRef ref) {
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: AppColors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,7 +118,7 @@ class MyPageScreen extends ConsumerWidget {
           // 3. 나의 옷장 섹션
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: _buildClosetSection(state),
+            child: _buildClosetSection(state, ref),
           ),
           const SizedBox(height: 40),
         ],
@@ -161,6 +168,10 @@ class MyPageScreen extends ConsumerWidget {
 
   // [MODIFY] 나의 취향 섹션
   Widget _buildMyTasteSection(BuildContext context, WidgetRef ref) {
+    // 실시간 데이터 구독
+    final shopsAsync = ref.watch(favoriteShopsProvider);
+    final chugumeAsync = ref.watch(chugumeProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -174,7 +185,9 @@ class MyPageScreen extends ConsumerWidget {
               Text('나의 취향', style: AppTextStyles.ptdBold(20)),
               GestureDetector(
                 onTap: () {
-                  context.push('/initial_question_start');
+                  // 👉 상태 리셋 후 바로 Q1으로 이동
+                  ref.read(initialQuestionProvider.notifier).reset();
+                  context.push('/initial_question?from=my');
                 },
                 child: Row(
                   children: [
@@ -198,18 +211,27 @@ class MyPageScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 20), // 헤더와 카드 사이 간격
 
-        // 2. 쇼핑몰 카드
+        // 2. 쇼핑몰 카드 (실제 데이터 연동)
         _buildTasteCard(
           title: '내가 자주 이용하는 쇼핑몰',
-          tags: ['무신사', '에이블리', '지그재그'],
+          tags: shopsAsync.when(
+            data: (shops) =>
+                shops.isEmpty ? ['미설정'] : shops.map((s) => s.label).toList(),
+            loading: () => ['로딩 중...'],
+            error: (_, __) => ['불러오기 실패'],
+          ),
         ),
 
         const SizedBox(height: 12), // 카드 사이 간격
 
-        // 3. 추구미 카드
+        // 3. 추구미 카드 (실제 데이터 연동)
         _buildTasteCard(
           title: '나의 추구미',
-          tags: ['모리걸'],
+          tags: chugumeAsync.when(
+            data: (type) => type != null ? [type.label] : ['미설정'],
+            loading: () => ['로딩 중...'],
+            error: (_, __) => ['불러오기 실패'],
+          ),
         ),
       ],
     );
@@ -221,11 +243,11 @@ class MyPageScreen extends ConsumerWidget {
       width: double.infinity, // 가로 꽉 채우기
       padding: const EdgeInsets.all(20), // 내부 여백 20px (시안 기준)
       decoration: BoxDecoration(
-        color: Colors.white, // 하얀색 배경
+        color: AppColors.white, // 하얀색 배경
         borderRadius: BorderRadius.circular(12), // 둥근 모서리
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: AppColors.black.withValues(alpha: 0.15),
             blurRadius: 12,
           ),
         ],
@@ -255,37 +277,55 @@ class MyPageScreen extends ConsumerWidget {
       ),
       child: Text(
         text,
-        style: AppTextStyles.ptdMedium(12).copyWith(color: Colors.white),
+        style: AppTextStyles.ptdMedium(12).copyWith(color: AppColors.white),
       ),
     );
   }
 
+  // 콤마 포맷팅 헬퍼
+  String _formatPrice(int price) {
+    return price.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  }
+
   // 나의 옷장 섹션 상세 [cite: 2026-02-16]
-  Widget _buildClosetSection(MyPageState state) {
+  Widget _buildClosetSection(MyPageState state, WidgetRef ref) {
+    final closetStatsAsync = ref.watch(closetStatsStateProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('나의 옷장', style: AppTextStyles.ptdBold(20)),
         const SizedBox(height: 16),
-        const Row(
-          children: [
-            Expanded(
-              child: ClosetStatCard(
-                // 💡 const 제거 (String 연산 등이 들어갈 수 있으므로) [cite: 2026-02-16]
-                title: '고심 끝에 구매한 옷',
-                count: 18,
-                price: '847,000원', // 💡 String으로 전달 [cite: 2026-02-16]
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: ClosetStatCard(
-                title: '아쉽지만 포기한 옷',
-                count: 7,
-                price: '289,000원', // 💡 String으로 전달 [cite: 2026-02-16]
-              ),
-            ),
-          ],
+        closetStatsAsync.when(
+          data: (stats) {
+            final boughtCount = stats?.boughtCount ?? 0;
+            final boughtPrice = stats?.boughtPrice ?? 0;
+            final droppedCount = stats?.droppedCount ?? 0;
+            final droppedPrice = stats?.droppedPrice ?? 0;
+
+            return Row(
+              children: [
+                Expanded(
+                  child: ClosetStatCard(
+                    title: '고심 끝에 구매한 옷',
+                    count: boughtCount,
+                    price: '${_formatPrice(boughtPrice)}원',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ClosetStatCard(
+                    title: '아쉽지만 포기한 옷',
+                    count: droppedCount,
+                    price: '${_formatPrice(droppedPrice)}원',
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const Center(child: Text("불러오기 실패")),
         ),
       ],
     );

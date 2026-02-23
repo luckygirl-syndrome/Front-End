@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,7 +21,7 @@ class SignupScreen extends ConsumerWidget {
     final notifier = ref.read(signupProvider.notifier);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBackBar(
         currentPage: state.currentPage,
         onBackPressed: () {

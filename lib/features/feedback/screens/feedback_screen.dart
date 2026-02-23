@@ -31,17 +31,17 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   @override
   Widget build(BuildContext context) {
     final feedbackState = ref.watch(feedbackProvider);
-    final _currentIndex = feedbackState.currentIndex;
-    final _isReturned = feedbackState.isReturned;
+    final currentIndex = feedbackState.currentIndex;
+    final isReturned = feedbackState.isReturned;
 
     // 반품 여부에 따른 전체 페이지 수 결정
-    int totalPages = _isReturned ? 2 : 3;
+    int totalPages = isReturned ? 2 : 3;
 
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBackBar(
         title: "내가 산 옷 평가하기",
-        currentPage: _currentIndex + 1,
+        currentPage: currentIndex + 1,
         onBackPressed: _handleBack,
       ),
       body: SafeArea(
@@ -56,7 +56,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               child: _buildMainQuestionArea(),
             ),
             AppIndicator(
-              currentPage: _currentIndex,
+              currentPage: currentIndex,
               totalPage: totalPages,
             ),
           ],
@@ -74,7 +74,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/images/product_sample.png',
+            child: Image.asset('assets/images/products/product_sample.png',
                 width: 100, height: 100, fit: BoxFit.cover),
           ),
           const SizedBox(width: 24),
@@ -103,7 +103,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text("구매한 지 18일 지남",
-                          style: AppTextStyles.ptdRegular(10)
+                          style: AppTextStyles.ptdRegular(12)
                               .copyWith(color: AppColors.grey)),
                       // const SizedBox(height: 4),
                       Text("22,200원",
@@ -122,12 +122,12 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   Widget _buildMainQuestionArea() {
     final state = ref.watch(feedbackProvider);
-    final _currentIndex = state.currentIndex;
-    final _isReturned = state.isReturned;
+    final currentIndex = state.currentIndex;
+    final isReturned = state.isReturned;
 
     // 👈 핑거 이모지: 현재 단계가 이유 입력 단계인지 확인합니다. [cite: 2026-02-17]
-    bool isReasonStep = (_isReturned && _currentIndex == 1) ||
-        (!_isReturned && _currentIndex == 2);
+    bool isReasonStep =
+        (isReturned && currentIndex == 1) || (!isReturned && currentIndex == 2);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 60, 32, 16),
@@ -151,19 +151,19 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   Widget _buildQuestionText() {
     final state = ref.watch(feedbackProvider);
-    final _currentIndex = state.currentIndex;
-    final _isReturned = state.isReturned;
+    final currentIndex = state.currentIndex;
+    final isReturned = state.isReturned;
 
-    String qNum = "Q${_currentIndex + 1}.";
+    String qNum = "Q${currentIndex + 1}.";
     String title = "";
 
     // 2. 분기 로직에 따른 타이틀 결정
-    if (_currentIndex == 0) {
+    if (currentIndex == 0) {
       title = "혹시 반품했나요?";
-    } else if (_isReturned) {
+    } else if (isReturned) {
       title = "반품 이유를 알려 주세요!";
     } else {
-      if (_currentIndex == 1) {
+      if (currentIndex == 1) {
         title = "만족하시나요?";
       } else {
         title = "이유를 알려 주세요!";
@@ -188,15 +188,15 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   Widget _buildStepContent() {
     final state = ref.watch(feedbackProvider);
-    final _currentIndex = state.currentIndex;
-    final _isReturned = state.isReturned;
+    final currentIndex = state.currentIndex;
+    final isReturned = state.isReturned;
 
-    if (_currentIndex == 0) {
+    if (currentIndex == 0) {
       return _buildQ1Buttons();
     }
 
     // 반품한 경우 (isReturned = true)
-    if (_isReturned) {
+    if (isReturned) {
       // 2단계: 바로 이유 입력창 노출
       return _buildReasonArea();
     }
@@ -204,7 +204,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     // 반품 안 한 경우 (isReturned = false)
     else {
       // 2단계: 만족도 선택 버튼 리스트
-      if (_currentIndex == 1) {
+      if (currentIndex == 1) {
         return _buildSatisfactionArea();
       }
       // 3단계: 이유 입력창 노출
@@ -255,15 +255,15 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final List<FeedbackButtonData> satisfactionItems = [
       FeedbackButtonData(
           text: "너무너무 별로예요..",
-          color: const Color(0xFFA1C1FF),
+          color: AppColors.secondaryMain,
           onTap: () => notifier.nextStep()),
       FeedbackButtonData(
           text: "조금 별로예요",
-          color: const Color(0xFFC6D9FF),
+          color: AppColors.secondaryLight,
           onTap: () => notifier.nextStep()),
       FeedbackButtonData(
           text: "이 정도면 괜찮죠",
-          color: const Color(0xFFFEE7A1),
+          color: AppColors.primaryLight,
           onTap: () => notifier.nextStep()),
       FeedbackButtonData(
           text: "최고예요!",

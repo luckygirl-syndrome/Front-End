@@ -32,7 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeProvider);
-    final _currentTopTabIndex = homeState.currentTopTabIndex;
+    final currentTopTabIndex = homeState.currentTopTabIndex;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -43,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const AppTopbar(), // 최상단 로고바 [cite: 2026-02-13]
 
             HomeTabBar(
-              currentIndex: _currentTopTabIndex,
+              currentIndex: currentTopTabIndex,
               onTabChanged: (index) {
                 ref.read(homeProvider.notifier).setTopTabIndex(index);
               },
@@ -51,7 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // 2. 가변 영역: Expanded를 써야 남은 공간을 다 차지하며 내용이 보입니다. [cite: 2026-02-13]
             Expanded(
-              child: _buildTabContent(_currentTopTabIndex),
+              child: _buildTabContent(currentTopTabIndex),
             ),
           ],
         ),

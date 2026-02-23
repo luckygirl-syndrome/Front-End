@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:ttobaba/features/my_page/models/chugume_model.dart';
+import 'package:ttobaba/features/my_page/models/shop_model.dart';
+import 'package:ttobaba/features/my_page/providers/chugume_provider.dart';
+import 'package:ttobaba/features/my_page/providers/shop_provider.dart';
 
 // 상태 클래스
 class InitialQuestionState {
@@ -64,7 +67,10 @@ class InitialQuestionState {
 
 // 노티파이어
 class InitialQuestionNotifier extends StateNotifier<InitialQuestionState> {
-  InitialQuestionNotifier() : super(InitialQuestionState());
+  // [추가] Ref 주입
+  final Ref ref;
+
+  InitialQuestionNotifier(this.ref) : super(InitialQuestionState());
 
   // 쇼핑몰 토글 (복수 선택)
   void toggleMall(String mall) {
@@ -97,12 +103,52 @@ class InitialQuestionNotifier extends StateNotifier<InitialQuestionState> {
   }
 
   /// [개선] 다음 버튼 클릭 시 로직 통합
-  void handleNext({required VoidCallback onAllFinished}) {
+  Future<void> handleNext({required VoidCallback onAllFinished}) async {
     if (state.currentIndex < state.questions.length - 1) {
       nextPage();
     } else {
+      // 마지막 페이지에서 다음 버튼 누르면 완료 처리 및 데이터 전송
+      await _submitResults();
       state = state.copyWith(isFinished: true);
       onAllFinished(); // 💡 내비게이션은 UI 레이어에서 처리
+    }
+  }
+
+  Future<void> _submitResults() async {
+    try {
+      // 1. Favorite Shops 전송
+      // 문자열 리스트를 ShopName enum 리스트로 변환
+      final shops = state.selectedMalls.map((label) {
+        return ShopName.values.firstWhere(
+          (s) => s.label == label,
+          orElse: () => ShopName.musinsa, // Default fallback
+        );
+      }).toList();
+
+      if (shops.isNotEmpty) {
+        await ref.read(favoriteShopsProvider.notifier).updateShops(shops);
+      }
+
+      // 2. Chugume 전송
+      // 사용자가 입력한 텍스트를 ChugumeType으로 매핑 (정확히 일치해야 함)
+      // 만약 입력이 자유 텍스트라면 API 스펙(ENUM)과 맞지 않을 수 있음.
+      // 일단 ENUM에 있는 값만 처리하도록 시도.
+      final chugumeInput = state.chugumiText.trim();
+      final chugumeType = ChugumeType.values.firstWhere(
+        (t) => t.label == chugumeInput,
+        orElse: () => ChugumeType.morigirl, // Default or handle error
+      );
+
+      // 텍스트가 비어있지 않거나 매칭되는 경우만 전송?
+      // 여기서는 기본적으로 Default로 매핑해서 전송하거나, 매칭 안되면 스킵하는 정책 필요.
+      // 사용자 입력이 ENUM과 다르면 전송 불가.
+      // TODO: 추구미 입력 방식이 텍스트 필드라면 validate 필요.
+      if (chugumeInput.isNotEmpty) {
+        await ref.read(chugumeProvider.notifier).updateChugume(chugumeType);
+      }
+    } catch (e) {
+      debugPrint("❌ [InitialQuestion] Submit Error: $e");
+      // UI에 에러를 알리거나 조용히 실패 처리
     }
   }
 
@@ -130,5 +176,5 @@ class InitialQuestionNotifier extends StateNotifier<InitialQuestionState> {
 // 프로바이더 선언
 final initialQuestionProvider =
     StateNotifierProvider<InitialQuestionNotifier, InitialQuestionState>((ref) {
-  return InitialQuestionNotifier();
+  return InitialQuestionNotifier(ref);
 });

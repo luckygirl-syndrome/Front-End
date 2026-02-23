@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/app_colors.dart';
+
 import '../theme/app_text_styles.dart';
 import 'app_button.dart';
 
@@ -21,7 +23,7 @@ class SbtiNoLikeBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -45,8 +47,8 @@ class SbtiNoLikeBase extends StatelessWidget {
                 runSpacing: 10,
                 children: buttons.map((btn) {
                   return SizedBox(
-                    width: buttons.length == 1 
-                        ? double.infinity 
+                    width: buttons.length == 1
+                        ? double.infinity
                         : (MediaQuery.of(context).size.width - 64 - 10) / 2,
                     child: AppButton(
                       text: btn['label']!,

@@ -6,8 +6,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class LinkInputPopup extends StatefulWidget {
-  final String title;      // 팝업 제목
-  final String hint;       // 입력창 힌트
+  final String title; // 팝업 제목
+  final String hint; // 입력창 힌트
   final String buttonText; // 버튼 텍스트
 
   const LinkInputPopup({
@@ -61,14 +61,15 @@ class _LinkInputPopupState extends State<LinkInputPopup> {
             onPressed: () => Navigator.pop(context),
             padding: EdgeInsets.zero, // 터치 영역 최적화
             constraints: const BoxConstraints(), // 기본 패딩 제거
-            icon: SvgPicture.asset( // 👈 Image.asset 대신 SvgPicture.asset 사용
+            icon: SvgPicture.asset(
+              // 👈 Image.asset 대신 SvgPicture.asset 사용
               'assets/icons/close_button.svg',
               width: 40,
               height: 40,
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // 2. 메인 팝업 컨테이너 (height: 274.dp)
           Container(
             width: double.infinity,
@@ -95,8 +96,11 @@ class _LinkInputPopupState extends State<LinkInputPopup> {
                 const SizedBox(height: 16),
                 AppButton(
                   text: widget.buttonText, // 👈 주입받은 버튼 텍스트 사용
-                  onPressed: _isFilled ? () => Navigator.pop(context, _controller.text) : () {},
-                  backgroundColor: _isFilled ? AppColors.primaryMain : const Color(0xFFCCCCCC),
+                  onPressed: _isFilled
+                      ? () => Navigator.pop(context, _controller.text)
+                      : () {},
+                  backgroundColor:
+                      _isFilled ? AppColors.primaryMain : AppColors.lightGrey,
                   borderRadius: 12,
                   textStyle: AppTextStyles.ptdBold(16),
                 ),

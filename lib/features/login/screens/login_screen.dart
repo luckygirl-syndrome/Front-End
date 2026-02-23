@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/features/login/widgets/login_footer.dart';
 import 'package:ttobaba/features/login/widgets/login_header.dart';
 import '../widgets/login_form.dart';
@@ -9,7 +10,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

@@ -4,9 +4,19 @@ import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/core/widgets/app_button.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ttobaba/features/chat/widgets/chat_item.dart';
+
+import 'package:intl/intl.dart';
 
 class DetailChatScreen extends ConsumerWidget {
-  const DetailChatScreen({super.key});
+  final ItemStatus status;
+  final Map<String, dynamic>? productData;
+
+  const DetailChatScreen({
+    super.key,
+    this.status = ItemStatus.considering,
+    this.productData,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,12 +88,12 @@ class DetailChatScreen extends ConsumerWidget {
           const Spacer(),
 
           // 3. 오른쪽: 아이콘 그룹 (장바구니 + 더보기)
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.shopping_bag_outlined,
+              Icon(Icons.shopping_bag_outlined,
                   color: AppColors.black, size: 24),
-              const SizedBox(width: 16), // 아이콘 사이 간격
-              const Icon(Icons.more_horiz, color: AppColors.black, size: 24),
+              SizedBox(width: 16), // 아이콘 사이 간격
+              Icon(Icons.more_horiz, color: AppColors.black, size: 24),
             ],
           ),
         ],
@@ -93,9 +103,36 @@ class DetailChatScreen extends ConsumerWidget {
 
   // 1. 상단 상품 정보 레이아웃
   Widget _buildProductHeader() {
+    String badgeText;
+    Color badgeBackgroundColor;
+    Color badgeTextColor = AppColors.white;
+    Border? badgeBorder;
+
+    final name = productData?['product_name'] ?? "상품이름 없음";
+    final brand = productData?['brand'] ?? "브랜드 없음";
+    final price = productData?['price'] ?? 0;
+    final formattedPrice = NumberFormat('#,###').format(price);
+    final imageUrl = productData?['product_img'];
+
+    switch (status) {
+      case ItemStatus.considering:
+        badgeText = '고민 중';
+        badgeBackgroundColor = AppColors.primaryMain;
+        break;
+      case ItemStatus.gaveUp:
+        badgeText = '구매 포기';
+        badgeBackgroundColor = AppColors.black;
+        break;
+      case ItemStatus.purchased:
+        badgeText = '구매 완료';
+        badgeTextColor = AppColors.primaryMain;
+        badgeBackgroundColor = AppColors.white;
+        badgeBorder = Border.all(color: AppColors.primaryMain);
+        break;
+    }
+
     return Container(
-      // 디자인 가이드 수치: 좌32, 상32, 우32, 하20
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       color: AppColors.white,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,12 +140,19 @@ class DetailChatScreen extends ConsumerWidget {
           // 1. 왼쪽 상품 이미지 (80x80 고정) [cite: 2026-02-16]
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/product_sample.png',
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    'assets/images/products/product_sample.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 16),
 
@@ -126,12 +170,12 @@ class DetailChatScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "에이블리",
+                        brand,
                         style: AppTextStyles.ptdBold(12)
                             .copyWith(color: AppColors.black),
                       ),
                       Text(
-                        "❤️기모선택❤️찰랑 하이웨스트 와이드 롱팬츠",
+                        name,
                         style: AppTextStyles.ptdRegular(12),
                         textAlign: TextAlign.right,
                         maxLines: 2,
@@ -149,18 +193,19 @@ class DetailChatScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryMain,
+                          color: badgeBackgroundColor,
                           borderRadius: BorderRadius.circular(4),
+                          border: badgeBorder,
                         ),
                         child: Text(
-                          "구매 포기",
+                          badgeText,
                           style: AppTextStyles.ptdMedium(12)
-                              .copyWith(color: AppColors.white),
+                              .copyWith(color: badgeTextColor),
                         ),
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        "22,200원",
+                        "$formattedPrice원",
                         style: AppTextStyles.ptdBold(20),
                       ),
                     ],
@@ -176,41 +221,86 @@ class DetailChatScreen extends ConsumerWidget {
 
   // 2. 중앙 액션 버튼
   Widget _buildActionButtons() {
+    Widget leftButton;
+    Widget rightButton;
+
+    switch (status) {
+      case ItemStatus.purchased:
+        // 구매 완료 상태: 오른쪽 버튼 "저 사실... 반품했어요"
+        leftButton = AppButton(
+          text: "내 평가 확인하기",
+          onPressed: () {},
+          backgroundColor: AppColors.white,
+          textColor: AppColors.black,
+          borderColor: AppColors.black,
+          borderWidth: 1,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        rightButton = AppButton(
+          text: "저 사실... 반품했어요",
+          onPressed: () {},
+          backgroundColor: AppColors.black,
+          textColor: AppColors.white,
+          borderColor: AppColors.black,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        break;
+      case ItemStatus.considering:
+        // 고민 중 상태: 왼쪽 "안 살래요" (secondaryMain), 오른쪽 "살래요" (primaryMain)
+        leftButton = AppButton(
+          text: "안 살래요",
+          onPressed: () {},
+          backgroundColor: AppColors.secondaryMain,
+          textColor: AppColors.white,
+          borderColor: AppColors.secondaryMain,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        rightButton = AppButton(
+          text: "살래요",
+          onPressed: () {},
+          backgroundColor: AppColors.primaryMain,
+          textColor: AppColors.white,
+          borderColor: AppColors.primaryMain,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        break;
+      case ItemStatus.gaveUp:
+        // 구매 포기 상태: 오른쪽 버튼 "저 사실... 샀어요"
+        leftButton = AppButton(
+          text: "내 평가 확인하기",
+          onPressed: () {},
+          backgroundColor: AppColors.white,
+          textColor: AppColors.black,
+          borderColor: AppColors.black,
+          borderWidth: 1,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        rightButton = AppButton(
+          text: "저 사실... 샀어요",
+          onPressed: () {},
+          backgroundColor: AppColors.black,
+          textColor: AppColors.white,
+          borderColor: AppColors.black,
+          textStyle: AppTextStyles.ptdBold(12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        );
+        break;
+    }
+
     return Container(
       // 디자인 가이드: 좌우 32, 상하 20 반영
       padding: const EdgeInsets.fromLTRB(32, 8, 32, 12),
       color: AppColors.white,
       child: Row(
         children: [
-          // 1. 내 평가 확인하기 버튼
-          Expanded(
-            child: AppButton(
-              text: "내 평가 확인하기",
-              onPressed: () {},
-              backgroundColor: AppColors.white,
-              textColor: AppColors.black,
-              borderColor: AppColors.black,
-              borderWidth: 1,
-              textStyle: AppTextStyles.ptdBold(12),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
-
-          // 2. 버튼 사이 간격 20px
+          Expanded(child: leftButton),
           const SizedBox(width: 20),
-
-          // 3. 저 사실... 샀어요 버튼
-          Expanded(
-            child: AppButton(
-              text: "저 사실... 샀어요",
-              onPressed: () {},
-              backgroundColor: AppColors.black,
-              textColor: AppColors.white,
-              borderColor: AppColors.black,
-              textStyle: AppTextStyles.ptdBold(12),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
+          Expanded(child: rightButton),
         ],
       ),
     );
@@ -265,7 +355,7 @@ class DetailChatScreen extends ConsumerWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: AppColors.black.withValues(alpha: 0.1),
                   blurRadius: 12,
                 ),
               ],
@@ -279,7 +369,7 @@ class DetailChatScreen extends ConsumerWidget {
           // 3. 시간 표시
           Text(
             time,
-            style: AppTextStyles.ptdMedium(8).copyWith(color: AppColors.black),
+            style: AppTextStyles.ptdMedium(12).copyWith(color: AppColors.black),
           ),
         ],
       ),
@@ -321,8 +411,8 @@ class DetailChatScreen extends ConsumerWidget {
               height: 36,
               decoration: const BoxDecoration(
                   color: AppColors.primaryMain, shape: BoxShape.circle),
-              child:
-                  const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.send_rounded,
+                  color: AppColors.white, size: 20),
             ),
           ],
         ),

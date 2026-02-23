@@ -20,7 +20,7 @@ class AppBackBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       centerTitle: true,
       title: (title != null && title!.isNotEmpty)

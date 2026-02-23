@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import 'package:ttobaba/core/theme/app_colors.dart';
+import 'package:ttobaba/core/theme/app_text_styles.dart';
 
 class AppTextField extends StatefulWidget {
   // 1. 생성자에 파라미터 추가
@@ -121,8 +121,8 @@ class _AppTextFieldState extends State<AppTextField> {
             width: _isObscured ? widget.iconSize : widget.iconSize * 0.7,
             child: Image.asset(
               _isObscured
-                  ? 'assets/images/eye_1.png'
-                  : 'assets/images/eye_2.png',
+                  ? 'assets/images/ui/eye_1.png'
+                  : 'assets/images/ui/eye_2.png',
               // ⭐ 이미지가 지정된 크기에 꽉 차도록 설정
               fit: BoxFit.contain,
               color: AppColors.lightGrey,

@@ -1,5 +1,9 @@
-// lib/features/auth/providers/login_provider.dart
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ttobaba/core/network/dio_provider.dart';
+import 'package:ttobaba/features/login/models/auth_model.dart';
+import 'package:ttobaba/features/login/repositories/auth_repository.dart';
 
 class LoginState {
   final String email;
@@ -18,7 +22,7 @@ class LoginState {
 }
 
 class LoginNotifier extends StateNotifier<LoginState> {
-  final Ref ref; // 1. Ref 추가
+  final Ref ref;
 
   LoginNotifier(this.ref) : super(LoginState());
 
@@ -32,12 +36,21 @@ class LoginNotifier extends StateNotifier<LoginState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // TODO: 실제 API 서버 통신 로직이 들어갈 자리
-      // final response = await ref.read(authRepositoryProvider).signIn(state.email, state.password);
+      final repository = ref.read(authRepositoryProvider);
+      final storage = ref.read(secureStorageProvider);
+
+      final token = await repository.login(LoginRequest(
+        email: state.email,
+        password: state.password,
+      ));
+
+      // 토큰 저장
+      await storage.write(key: 'access_token', value: token);
 
       state = state.copyWith(isLoading: false);
       return true; // 로그인 성공
     } catch (e) {
+      debugPrint("Login Error: $e");
       state = state.copyWith(isLoading: false);
       return false; // 로그인 실패
     }

@@ -13,9 +13,9 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x331C1C1C),
+            color: AppColors.black.withValues(alpha: 0.2),
             blurRadius: 16,
           ),
         ],
@@ -27,7 +27,7 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
         children: [
           // 섹션 1: 상단 로고
           _buildLogo(),
-          
+
           const SizedBox(height: 16),
           _buildDottedLine(),
           const SizedBox(height: 16),
@@ -64,8 +64,8 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
 
   Widget _buildLogo() {
     return SvgPicture.asset(
-      'assets/images/logo.svg', // 2. 확장자 변경 [cite: 2025-11-27]
-      height: 40, 
+      'assets/images/logos/logo.svg', // 2. 확장자 변경 [cite: 2025-11-27]
+      height: 40,
       fit: BoxFit.contain,
     );
   }
@@ -74,13 +74,13 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final boxWidth = constraints.constrainWidth();
-        const dashWidth = 4.0;  // Dash: 4
-        const dashGap = 2.0;    // Gap: 2
+        const dashWidth = 4.0; // Dash: 4
+        const dashGap = 2.0; // Gap: 2
         const dashHeight = 1.0; // Stroke weight: 1
-        
+
         // Dash와 Gap을 합친 총 너비(6.0)를 기준으로 개수 계산
         final dashCount = (boxWidth / (dashWidth + dashGap)).floor();
-        
+
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(dashCount, (_) {
@@ -90,7 +90,7 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   // DarkScale/Black (1A) 색상 반영
-                  color: AppColors.black, 
+                  color: AppColors.black,
                 ),
               ),
             );
@@ -131,10 +131,8 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
         color: AppColors.primaryMain,
         shape: BoxShape.circle,
       ),
-      child: Text(
-        char, 
-        style: AppTextStyles.ptdBold(16).copyWith(color: AppColors.black)
-      ),
+      child: Text(char,
+          style: AppTextStyles.ptdBold(16).copyWith(color: AppColors.black)),
     );
   }
 
@@ -152,8 +150,10 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.asset(
-            'assets/images/product_sample.png',
-            width: 80, height: 80, fit: BoxFit.cover,
+            'assets/images/products/product_sample.png',
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
           ),
         ),
       ],
@@ -209,8 +209,8 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
     return Column(
       children: [
         SvgPicture.asset(
-          'assets/images/barcode.svg', 
-          height: 28, 
+          'assets/images/logos/barcode.svg',
+          height: 28,
           fit: BoxFit.contain,
         ),
         const SizedBox(height: 8),
@@ -220,13 +220,13 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "또 사기 전에 또바바", 
-              style: AppTextStyles.ptdBold(12).copyWith(color: Colors.grey),
+              "또 사기 전에 또바바",
+              style: AppTextStyles.ptdBold(12).copyWith(color: AppColors.grey),
             ),
             const SizedBox(width: 12),
             SvgPicture.asset(
-              'assets/images/grey_logo.svg',
-              height: 24, 
+              'assets/images/logos/grey_logo.svg',
+              height: 24,
               fit: BoxFit.contain,
             ),
           ],

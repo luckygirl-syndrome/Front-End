@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_text_styles.dart';
+import 'package:ttobaba/core/theme/app_colors.dart';
 import '../../../core/widgets/app_backbar.dart';
 import '../../../core/widgets/app_indicator.dart';
 import '../providers/sbti_provider.dart';
 import '../widgets/sbti_quesiton_content.dart';
-import '../widgets/sbti_question_button.dart';
 
 class SbtiQuestionScreen extends ConsumerWidget {
   const SbtiQuestionScreen({super.key});
@@ -17,29 +16,22 @@ class SbtiQuestionScreen extends ConsumerWidget {
     final notifier = ref.read(sbtiProvider.notifier);
 
     // 💡 리스너: 상태 변경 시 1회만 실행됨
-    ref.listen(sbtiProvider, (prev, next) {
+    ref.listen(sbtiProvider, (prev, next) async {
       if (next.currentIndex >= 9 && (prev?.currentIndex ?? 0) < 9) {
-        // 💡 [추가] 로그 출력 로직
-        print('==== S-BTI 테스트 결과 로그 ====');
-
-        // 각 쌍별로 백분율 계산
-        void logRatio(String top, String bottom, String label) {
-          int tScore = next.scores[top] ?? 0;
-          int bScore = next.scores[bottom] ?? 0;
-          int total = tScore + bScore;
-
-          if (total > 0) {
-            double percent = (tScore / total) * 100;
-            print('$label: $top($percent%) vs $bottom(${100 - percent}%)');
-          } else {
-            print('$label: 데이터 없음');
+        try {
+          await notifier.submitPersona();
+        } catch (e) {
+          // 서버 오류여도 사용자를 막지 않음 (서버측 500 에러 확인됨)
+          debugPrint("Persona Submission Failed: $e");
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('결과 저장에 실패했지만, 계속 진행합니다.')),
+            );
           }
+          // ⚠️ return 제거: 서버 에러여도 다음 화면으로 이동
         }
 
-        logRatio('D', 'N', '유형 1 (도파민 vs 생존)');
-        logRatio('S', 'A', '유형 2 (사회자극 vs 미적자극)');
-        logRatio('M', 'T', '유형 3 (마이웨이 vs 유행)');
-        print('==============================');
+        if (!context.mounted) return;
 
         final String? from =
             GoRouterState.of(context).uri.queryParameters['from'];
@@ -47,7 +39,7 @@ class SbtiQuestionScreen extends ConsumerWidget {
         if (from == 'my') {
           context.push('/my_page');
         } else {
-          context.push('/initial_question_start');
+          context.go('/home');
         }
       }
     });
@@ -64,7 +56,7 @@ class SbtiQuestionScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBackBar(
         currentPage: state.currentIndex,
         onBackPressed: () =>

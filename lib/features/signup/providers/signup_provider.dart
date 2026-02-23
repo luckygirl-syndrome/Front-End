@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ttobaba/core/network/dio_provider.dart';
+import 'package:ttobaba/features/login/models/auth_model.dart';
+import 'package:ttobaba/features/login/repositories/auth_repository.dart';
 
 // State는 순수하게 입력된 텍스트 값과 상태 정보만 들고있는게 좋음
 class SignupState {
@@ -87,16 +90,19 @@ class SignupNotifier extends StateNotifier<SignupState> {
     switch (pageIndex) {
       case 1: // 이메일 페이지
         if (guideIndex == 0) return state.isEmailValid; // 형식 체크
-        if (guideIndex == 1)
+        if (guideIndex == 1) {
           return state.email.length >= 8 && state.email.length <= 16; // 길이 체크
+        }
         return false;
 
       case 2: // 비밀번호 페이지
         // 0: 8~16자, 1: 영어/숫자 조합
-        if (guideIndex == 0)
+        if (guideIndex == 0) {
           return state.password.length >= 8 && state.password.length <= 16;
-        if (guideIndex == 1)
+        }
+        if (guideIndex == 1) {
           return RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(state.password);
+        }
         return false;
 
       case 3: // 비밀번호 확인 페이지
@@ -113,19 +119,37 @@ class SignupNotifier extends StateNotifier<SignupState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // 2. 다른 프로바이더(예: Repository)에 접근해서 실제 서버에 데이터 전송
-      // final authRepo = ref.read(authRepositoryProvider);
-      // final result = await authRepo.signUp(state.name, state.email, state.password);
+      final authRepo = ref.read(authRepositoryProvider);
+      final storage = ref.read(secureStorageProvider);
 
-      // 3. 가입 성공 후, 유저 정보를 전역 유저 상태에 저장
-      // ref.read(userProvider.notifier).setUser(result.user);
+      // 1. 회원가입 요청
+      await authRepo.signup(SignupRequest(
+        email: state.email,
+        password: state.password,
+        nickname: state.name,
+      ));
+
+      // 2. 자동 로그인: Token 받아오기
+      final token = await authRepo.login(LoginRequest(
+        email: state.email,
+        password: state.password,
+      ));
+
+      // 3. 토큰 저장 (로그인 성공 처리)
+      await storage.write(key: 'access_token', value: token);
+
+      // 필요한 경우 UserProvider 초기화 등 추가 작업 가능
+    } catch (e) {
+      debugPrint("Signup Error: $e");
+      // 에러 처리를 위해 rethrow하거나 상태에 에러 메시지 저장
+      rethrow;
     } finally {
       state = state.copyWith(isLoading: false);
     }
   }
 
   // 3. 페이지 이동 (이제 여기서 모든 걸 판단)
-  void next(VoidCallback onComplete) {
+  void next(VoidCallback onComplete) async {
     if (isCurrentPageValid()) {
       if (state.currentPage < 3) {
         final nextStep = state.currentPage + 1;
@@ -139,9 +163,13 @@ class SignupNotifier extends StateNotifier<SignupState> {
         );
       } else {
         // 회원가입 완료 로직
-        completeSignup().then((_) {
+        try {
+          await completeSignup();
           onComplete();
-        });
+        } catch (e) {
+          // 에러 발생 시 처리 (예: 스낵바 표시)
+          // UI에서 처리할 수 있도록 콜백을 수정하거나 상태로 에러 전달 필요
+        }
       }
     }
   }

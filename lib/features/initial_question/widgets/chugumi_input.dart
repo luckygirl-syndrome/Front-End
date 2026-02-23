@@ -39,7 +39,7 @@ class ChugumiInput extends StatelessWidget {
             textColor: AppColors.white,
             // 클릭 시 값 저장 및 즉시 다음 페이지로 이동
             onPressed: () {
-              onChanged('$title\n$subtitle');
+              onChanged(title); // 제목만 전달 (ChugumeType.label과 매칭용)
               onNext();
             },
           ),

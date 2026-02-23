@@ -11,7 +11,7 @@ class LoginHeader extends StatelessWidget {
     return Column(
       children: [
         SvgPicture.asset(
-          'assets/images/logo.svg',
+          'assets/images/logos/logo.svg',
           height: 70,
         ),
         const SizedBox(height: 28),

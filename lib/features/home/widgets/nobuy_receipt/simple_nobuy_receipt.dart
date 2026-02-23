@@ -11,16 +11,16 @@ class SimpleNoBuyReceipt extends StatelessWidget {
   final Color shadowColor;
   final VoidCallback? onTap;
 
-  Color get contentColor => backgroundColor == AppColors.white 
-      ? AppColors.black 
-      : AppColors.white;
+  Color get contentColor =>
+      backgroundColor == AppColors.white ? AppColors.black : AppColors.white;
 
   const SimpleNoBuyReceipt({
     super.key,
-    this.title = "여성 아이스제로 레이디 미들 다운자켓#2_LE",    // 제품 이름 [cite: 2026-01-02]
-    this.price = "251,100원",    // 가격 [cite: 2026-01-02]
+    this.title = "여성 아이스제로 레이디 미들 다운자켓#2_LE", // 제품 이름 [cite: 2026-01-02]
+    this.price = "251,100원", // 가격 [cite: 2026-01-02]
     this.discount = "37%", // 할인율 [cite: 2026-01-02]
-    this.imageUrl = "assets/images/product_sample.png", // 사진 경로 [cite: 2026-01-02]
+    this.imageUrl =
+        "assets/images/products/product_sample.png", // 사진 경로 [cite: 2026-01-02]
     this.backgroundColor = AppColors.primaryMain,
     this.shadowColor = AppColors.primaryMain,
     this.onTap,
@@ -30,7 +30,7 @@ class SimpleNoBuyReceipt extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double cardWidth = screenWidth * (240 / 390);
-    
+
     return GestureDetector(
       onTap: onTap, // 외부에서 주입받은 클릭 이벤트 실행 [cite: 2026-02-13]
       child: Container(

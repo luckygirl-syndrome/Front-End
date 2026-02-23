@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../sbti/providers/sbti_provider.dart';
+import '../../sbti/providers/persona_provider.dart';
+import '../../sbti/models/persona_model.dart';
 
 class SbtiResultCard extends ConsumerWidget {
   // 💡 ConsumerWidget으로 변경
@@ -11,29 +12,32 @@ class SbtiResultCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 💡 실제 Provider 상태를 구독합니다.
-    final sbtiState = ref.watch(sbtiProvider);
-    final scores = sbtiState.scores;
+    // 💡 실제 백엔드 Persona 상태를 구독합니다.
+    final personaAsync = ref.watch(personaStateProvider);
+    final persona = personaAsync.value;
 
-    // 🎨 각 유형별 비율 계산 (각 유형당 질문 3개 기준)
-    // 0.5가 중간값이며, 한쪽 유형이 많을수록 1.0 또는 0.0에 가까워집니다.
-    double getRatio(String topType, String bottomType) {
-      int topScore = scores[topType] ?? 0;
-      int bottomScore = scores[bottomType] ?? 0;
-      int total = topScore + bottomScore;
+    // 🎨 각 축(Axis)의 비율 계산
+    // 0.5가 중간값이며, 한쪽 유형이 강할수록 1.0 또는 0.0에 가까워집니다.
+    double getRatio(String topType, String bottomType, AxisScore? axis) {
+      if (axis == null) return 0.5; // 데이터가 없으면 중간
 
-      if (total == 0) return 0.5; // 데이터가 없으면 중간
-      return topScore / total; // 상단 유형의 비율 (0.0 ~ 1.0)
+      // axis.score는 axis.result에 해당하는 값의 퍼센티지 (예: 80)
+      if (axis.result == topType) {
+        return axis.score / 100.0;
+      } else if (axis.result == bottomType) {
+        return (100 - axis.score) / 100.0;
+      }
+      return 0.5;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: AppColors.black.withValues(alpha: 0.15),
             blurRadius: 12,
             offset: const Offset(0, 2),
           )
@@ -47,19 +51,19 @@ class SbtiResultCard extends ConsumerWidget {
               topSub: '도파민',
               bottomLabel: 'N',
               bottomSub: '생존',
-              value: getRatio('D', 'N')), // 💡 계산된 비율 전달
+              value: getRatio('D', 'N', persona?.dVsN)), // 💡 계산된 비율 전달
           _SbtiBar(
               topLabel: 'S',
               topSub: '사회 자극',
               bottomLabel: 'A',
               bottomSub: '미적 자극',
-              value: getRatio('S', 'A')), // 💡 계산된 비율 전달
+              value: getRatio('S', 'A', persona?.sVsA)), // 💡 계산된 비율 전달
           _SbtiBar(
               topLabel: 'M',
               topSub: '마이웨이',
               bottomLabel: 'T',
               bottomSub: '유행',
-              value: getRatio('M', 'T')), // 💡 계산된 비율 전달
+              value: getRatio('M', 'T', persona?.mVsT)), // 💡 계산된 비율 전달
         ],
       ),
     );
@@ -83,14 +87,9 @@ class _SbtiBar extends StatelessWidget {
     const double barHeight = 80.0;
     const double barWidth = 4.0;
 
-    // 💡 노란색이 가득 차지 않도록 비율을 조정 (최대 85%만 차오르게)
-    const double maxVisualRatio = 0.85;
-
-    // 🎨 점수 계산
+    // 🎨 점수 상관없이 이긴 쪽이 50% 꽉 차게 설정
     final bool isTopActive = value >= 0.5;
-    // 실제 표시할 높이: 최소값(바 두께만큼) ~ 최대값(barHeight * 0.85)
-    final double displayValue =
-        (isTopActive ? value : (1 - value)) * maxVisualRatio;
+    const double displayHeight = barHeight / 2; // 항상 딱 절반만 채움
 
     const Color activeColor = AppColors.black;
     const Color inactiveColor = AppColors.lightGrey; // 연한 회색
@@ -116,18 +115,21 @@ class _SbtiBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(barWidth / 2),
           ),
           child: Stack(
-            // 💡 Alignment를 중앙으로 잡거나, 조건에 따라 위/아래로 정렬합니다.
-            alignment:
-                isTopActive ? Alignment.topCenter : Alignment.bottomCenter,
+            clipBehavior: Clip.none,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                // 💡 전체 높이의 85%까지만 차오르도록 계산
-                height: barHeight * displayValue,
-                width: barWidth,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryMain,
-                  borderRadius: BorderRadius.circular(barWidth / 2),
+              // 💡 비율에 따라 중앙에서 위(혹은 아래)로 자라나도록 Positioned 활용
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: isTopActive ? (barHeight / 2) : null,
+                top: isTopActive ? null : (barHeight / 2),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  height: displayHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryMain,
+                    borderRadius: BorderRadius.circular(barWidth / 2),
+                  ),
                 ),
               ),
             ],

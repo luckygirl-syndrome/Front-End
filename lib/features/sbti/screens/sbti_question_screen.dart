@@ -37,7 +37,7 @@ class SbtiQuestionScreen extends ConsumerWidget {
             GoRouterState.of(context).uri.queryParameters['from'];
 
         if (from == 'my') {
-          context.push('/my_page');
+          context.push('/taste_update_complete');
         } else {
           context.go('/home');
         }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
-import 'package:ttobaba/core/widgets/app_backbar.dart';
+// App bar removed per design change
 import 'package:ttobaba/core/widgets/app_button.dart';
 
 /// 마이페이지에서 취향 다시 설정 완료 후 보여주는 화면
@@ -13,9 +13,7 @@ class TasteUpdateCompleteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBackBar(
-        onBackPressed: () => context.pop(),
-      ),
+      // no appBar: full-bleed look as requested
       body: Stack(
         children: [
           // 1. 배경 (그라데이션) — initial_question_start_screen과 동일
@@ -37,10 +35,10 @@ class TasteUpdateCompleteScreen extends StatelessWidget {
             ),
           ),
 
-          // 2. 캐릭터 이미지 (중앙)
+          // 2. 중앙 아바타 이미지 (대체)
           Center(
             child: Image.asset(
-              'assets/images/cats/initial_question_cat_end.png',
+              'assets/images/avatars/image 201-1.png',
               height: 96,
             ),
           ),
@@ -59,7 +57,7 @@ class TasteUpdateCompleteScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   AppButton(
-                    text: '확인',
+                    text: '좋았어~!',
                     onPressed: () => context.go('/my_page'),
                   ),
                   const SizedBox(height: 20),

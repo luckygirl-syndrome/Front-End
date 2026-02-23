@@ -116,7 +116,7 @@ class HomeTtobabaSection extends ConsumerWidget {
                             Text(
                               "잠시 후 다시 시도해주세요.",
                               style: AppTextStyles.ptdRegular(12)
-                                  .copyWith(color: AppColors.darkGrey),
+                                  .copyWith(color: AppColors.grey),
                             ),
                           ],
                         ),

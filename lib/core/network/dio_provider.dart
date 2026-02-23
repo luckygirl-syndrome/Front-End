@@ -16,7 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: "http://localhost:8000", // API Base URL (로컬 백엔드 서버 우선 사용)
+      baseUrl: "http://18.118.233.127:8001", // AWS 백엔드
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       contentType: 'application/json',

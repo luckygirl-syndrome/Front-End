@@ -6,6 +6,7 @@ import 'package:ttobaba/features/my_page/screens/profile_edit_screen.dart';
 import '../../features/initial_question/screens/initial_question_no_like_screen.dart';
 import '../../features/initial_question/screens/initial_question_screen.dart';
 import '../../features/initial_question/screens/initial_question_start_screen.dart';
+import '../../features/initial_question/screens/taste_update_complete_screen.dart';
 import '../../features/login/screens/login_screen.dart';
 import '../../features/sbti/screens/sbti_no_like_screen.dart';
 import '../../features/sbti/screens/sbti_question_screen.dart';
@@ -81,11 +82,17 @@ final appRouterStateProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/initial_question',
-        builder: (context, state) => const InitialQuestionScreen(),
+        builder: (context, state) => InitialQuestionScreen(
+          from: state.uri.queryParameters['from'],
+        ),
       ),
       GoRoute(
         path: '/initial_question_no_like',
         builder: (context, state) => const InitialQuestionNoLikeScreen(),
+      ),
+      GoRoute(
+        path: '/taste_update_complete',
+        builder: (context, state) => const TasteUpdateCompleteScreen(),
       ),
       GoRoute(
         path: '/my_page',

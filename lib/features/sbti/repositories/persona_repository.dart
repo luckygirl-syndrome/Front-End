@@ -30,8 +30,8 @@ class PersonaRepository {
       final body = persona.toJson();
       debugPrint("🚀 [REQ BODY] ${jsonEncode(body)}");
 
-      await _dio.post(
-        '/api/setting/profile/persona',
+      await _dio.put(
+        '/api/profile/persona',
         data: body,
       );
     } catch (e) {

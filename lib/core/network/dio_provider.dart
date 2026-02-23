@@ -16,7 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: "http://172.31.99.74:8000", // API Base URL (로컬 백엔드 서버)
+      baseUrl: "http://18.118.233.127:8001", // API Base URL (원격 백엔드 서버)
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       contentType: 'application/json',

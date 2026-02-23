@@ -34,48 +34,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Future<void> loadChatList() async {
     state = state.copyWith(isLoading: true);
-    await Future.delayed(const Duration(milliseconds: 500)); // API 호출 흉내
-
-    // 더미 데이터 분배 (고민 중 2개, 결정 완료(구매완료 1, 포기 1))
-    final dummyChats = [
-      {
-        'id': 1,
-        'title': '[단독] [🔴라이브특가/+뉴컬러/50만장돌파🏆/made] 시오 니트 1',
-        'price': '13,410원',
-        'date': '어제',
-        'imageUrl': 'assets/images/products/product_sample.png',
-        'status': 'considering', // 고민 중
-      },
-      {
-        'id': 2,
-        'title': '봄버 재킷',
-        'price': '45,000원',
-        'date': '2일 전',
-        'imageUrl': 'assets/images/products/product_sample.png',
-        'status': 'purchased', // 결정 완료 - 구매 완료
-      },
-      {
-        'id': 3,
-        'title': '가죽 숄더백',
-        'price': '89,000원',
-        'date': '3일 전',
-        'imageUrl': 'assets/images/products/product_sample.png',
-        'status': 'gaveUp', // 결정 완료 - 구매 포기
-      },
-      {
-        'id': 4,
-        'title': '기본 면 티셔츠',
-        'price': '12,000원',
-        'date': '4일 전',
-        'imageUrl': 'assets/images/products/product_sample.png',
-        'status': 'considering', // 고민 중
-      },
-    ];
-
-    state = state.copyWith(
-      chatList: dummyChats,
-      isLoading: false,
-    );
+    try {
+      final repository = ref.read(chatRepositoryProvider);
+      final chats = await repository.getChatList();
+      state = state.copyWith(
+        chatList: chats,
+        isLoading: false,
+      );
+    } catch (e) {
+      debugPrint("❌ [Load Chat List] Error: $e");
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<bool> startChat(String productUrl) async {

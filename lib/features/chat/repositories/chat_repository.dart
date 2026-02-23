@@ -43,4 +43,13 @@ class ChatRepository {
       rethrow;
     }
   }
+
+  Future<List<Map<String, dynamic>>> getChatList() async {
+    try {
+      final response = await _dio.get('/api/chat/list');
+      return List<Map<String, dynamic>>.from(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

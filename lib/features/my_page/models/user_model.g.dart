@@ -33,3 +33,19 @@ Map<String, dynamic> _$$ProfileUpdateRequestImplToJson(
       'nickname': instance.nickname,
       'profile_img': instance.profileImg,
     };
+
+_$ClosetStatsImpl _$$ClosetStatsImplFromJson(Map<String, dynamic> json) =>
+    _$ClosetStatsImpl(
+      boughtCount: (json['bought_count'] as num).toInt(),
+      boughtPrice: (json['bought_price'] as num).toInt(),
+      droppedCount: (json['dropped_count'] as num).toInt(),
+      droppedPrice: (json['dropped_price'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$$ClosetStatsImplToJson(_$ClosetStatsImpl instance) =>
+    <String, dynamic>{
+      'bought_count': instance.boughtCount,
+      'bought_price': instance.boughtPrice,
+      'dropped_count': instance.droppedCount,
+      'dropped_price': instance.droppedPrice,
+    };

@@ -392,3 +392,234 @@ abstract class _ProfileUpdateRequest implements ProfileUpdateRequest {
   _$$ProfileUpdateRequestImplCopyWith<_$ProfileUpdateRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
+
+ClosetStats _$ClosetStatsFromJson(Map<String, dynamic> json) {
+  return _ClosetStats.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ClosetStats {
+  @JsonKey(name: 'bought_count')
+  int get boughtCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'bought_price')
+  int get boughtPrice => throw _privateConstructorUsedError;
+  @JsonKey(name: 'dropped_count')
+  int get droppedCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'dropped_price')
+  int get droppedPrice => throw _privateConstructorUsedError;
+
+  /// Serializes this ClosetStats to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ClosetStats
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ClosetStatsCopyWith<ClosetStats> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ClosetStatsCopyWith<$Res> {
+  factory $ClosetStatsCopyWith(
+          ClosetStats value, $Res Function(ClosetStats) then) =
+      _$ClosetStatsCopyWithImpl<$Res, ClosetStats>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'bought_count') int boughtCount,
+      @JsonKey(name: 'bought_price') int boughtPrice,
+      @JsonKey(name: 'dropped_count') int droppedCount,
+      @JsonKey(name: 'dropped_price') int droppedPrice});
+}
+
+/// @nodoc
+class _$ClosetStatsCopyWithImpl<$Res, $Val extends ClosetStats>
+    implements $ClosetStatsCopyWith<$Res> {
+  _$ClosetStatsCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ClosetStats
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? boughtCount = null,
+    Object? boughtPrice = null,
+    Object? droppedCount = null,
+    Object? droppedPrice = null,
+  }) {
+    return _then(_value.copyWith(
+      boughtCount: null == boughtCount
+          ? _value.boughtCount
+          : boughtCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      boughtPrice: null == boughtPrice
+          ? _value.boughtPrice
+          : boughtPrice // ignore: cast_nullable_to_non_nullable
+              as int,
+      droppedCount: null == droppedCount
+          ? _value.droppedCount
+          : droppedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      droppedPrice: null == droppedPrice
+          ? _value.droppedPrice
+          : droppedPrice // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ClosetStatsImplCopyWith<$Res>
+    implements $ClosetStatsCopyWith<$Res> {
+  factory _$$ClosetStatsImplCopyWith(
+          _$ClosetStatsImpl value, $Res Function(_$ClosetStatsImpl) then) =
+      __$$ClosetStatsImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'bought_count') int boughtCount,
+      @JsonKey(name: 'bought_price') int boughtPrice,
+      @JsonKey(name: 'dropped_count') int droppedCount,
+      @JsonKey(name: 'dropped_price') int droppedPrice});
+}
+
+/// @nodoc
+class __$$ClosetStatsImplCopyWithImpl<$Res>
+    extends _$ClosetStatsCopyWithImpl<$Res, _$ClosetStatsImpl>
+    implements _$$ClosetStatsImplCopyWith<$Res> {
+  __$$ClosetStatsImplCopyWithImpl(
+      _$ClosetStatsImpl _value, $Res Function(_$ClosetStatsImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ClosetStats
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? boughtCount = null,
+    Object? boughtPrice = null,
+    Object? droppedCount = null,
+    Object? droppedPrice = null,
+  }) {
+    return _then(_$ClosetStatsImpl(
+      boughtCount: null == boughtCount
+          ? _value.boughtCount
+          : boughtCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      boughtPrice: null == boughtPrice
+          ? _value.boughtPrice
+          : boughtPrice // ignore: cast_nullable_to_non_nullable
+              as int,
+      droppedCount: null == droppedCount
+          ? _value.droppedCount
+          : droppedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      droppedPrice: null == droppedPrice
+          ? _value.droppedPrice
+          : droppedPrice // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ClosetStatsImpl implements _ClosetStats {
+  const _$ClosetStatsImpl(
+      {@JsonKey(name: 'bought_count') required this.boughtCount,
+      @JsonKey(name: 'bought_price') required this.boughtPrice,
+      @JsonKey(name: 'dropped_count') required this.droppedCount,
+      @JsonKey(name: 'dropped_price') required this.droppedPrice});
+
+  factory _$ClosetStatsImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ClosetStatsImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'bought_count')
+  final int boughtCount;
+  @override
+  @JsonKey(name: 'bought_price')
+  final int boughtPrice;
+  @override
+  @JsonKey(name: 'dropped_count')
+  final int droppedCount;
+  @override
+  @JsonKey(name: 'dropped_price')
+  final int droppedPrice;
+
+  @override
+  String toString() {
+    return 'ClosetStats(boughtCount: $boughtCount, boughtPrice: $boughtPrice, droppedCount: $droppedCount, droppedPrice: $droppedPrice)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ClosetStatsImpl &&
+            (identical(other.boughtCount, boughtCount) ||
+                other.boughtCount == boughtCount) &&
+            (identical(other.boughtPrice, boughtPrice) ||
+                other.boughtPrice == boughtPrice) &&
+            (identical(other.droppedCount, droppedCount) ||
+                other.droppedCount == droppedCount) &&
+            (identical(other.droppedPrice, droppedPrice) ||
+                other.droppedPrice == droppedPrice));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, boughtCount, boughtPrice, droppedCount, droppedPrice);
+
+  /// Create a copy of ClosetStats
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ClosetStatsImplCopyWith<_$ClosetStatsImpl> get copyWith =>
+      __$$ClosetStatsImplCopyWithImpl<_$ClosetStatsImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ClosetStatsImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ClosetStats implements ClosetStats {
+  const factory _ClosetStats(
+          {@JsonKey(name: 'bought_count') required final int boughtCount,
+          @JsonKey(name: 'bought_price') required final int boughtPrice,
+          @JsonKey(name: 'dropped_count') required final int droppedCount,
+          @JsonKey(name: 'dropped_price') required final int droppedPrice}) =
+      _$ClosetStatsImpl;
+
+  factory _ClosetStats.fromJson(Map<String, dynamic> json) =
+      _$ClosetStatsImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'bought_count')
+  int get boughtCount;
+  @override
+  @JsonKey(name: 'bought_price')
+  int get boughtPrice;
+  @override
+  @JsonKey(name: 'dropped_count')
+  int get droppedCount;
+  @override
+  @JsonKey(name: 'dropped_price')
+  int get droppedPrice;
+
+  /// Create a copy of ClosetStats
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ClosetStatsImplCopyWith<_$ClosetStatsImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

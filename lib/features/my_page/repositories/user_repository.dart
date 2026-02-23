@@ -94,4 +94,15 @@ class UserRepository {
       rethrow;
     }
   }
+
+  // ── Closet Stats ──
+
+  Future<ClosetStats> getClosetStats() async {
+    try {
+      final response = await _dio.get('/api/profile/closet');
+      return ClosetStats.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

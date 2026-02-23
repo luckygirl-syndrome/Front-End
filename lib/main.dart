@@ -32,6 +32,15 @@ class MyApp extends ConsumerWidget {
         ),
       ),
       routerConfig: router ?? appRouter,
+      builder: (context, child) {
+        return Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 480),
+            color: AppColors.white,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

@@ -17,6 +17,7 @@ import 'package:ttobaba/features/sbti/providers/sbti_provider.dart';
 import 'package:ttobaba/features/my_page/providers/shop_provider.dart';
 import 'package:ttobaba/features/my_page/providers/chugume_provider.dart';
 import 'package:ttobaba/features/initial_question/provider/initial_question_provider.dart';
+import 'package:ttobaba/features/my_page/providers/closet_provider.dart';
 
 class MyPageScreen extends ConsumerWidget {
   const MyPageScreen({super.key});
@@ -117,7 +118,7 @@ class MyPageScreen extends ConsumerWidget {
           // 3. 나의 옷장 섹션
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: _buildClosetSection(state),
+            child: _buildClosetSection(state, ref),
           ),
           const SizedBox(height: 40),
         ],
@@ -281,32 +282,50 @@ class MyPageScreen extends ConsumerWidget {
     );
   }
 
+  // 콤마 포맷팅 헬퍼
+  String _formatPrice(int price) {
+    return price.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  }
+
   // 나의 옷장 섹션 상세 [cite: 2026-02-16]
-  Widget _buildClosetSection(MyPageState state) {
+  Widget _buildClosetSection(MyPageState state, WidgetRef ref) {
+    final closetStatsAsync = ref.watch(closetStatsStateProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('나의 옷장', style: AppTextStyles.ptdBold(20)),
         const SizedBox(height: 16),
-        const Row(
-          children: [
-            Expanded(
-              child: ClosetStatCard(
-                // 💡 const 제거 (String 연산 등이 들어갈 수 있으므로) [cite: 2026-02-16]
-                title: '고심 끝에 구매한 옷',
-                count: 18,
-                price: '847,000원', // 💡 String으로 전달 [cite: 2026-02-16]
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: ClosetStatCard(
-                title: '아쉽지만 포기한 옷',
-                count: 7,
-                price: '289,000원', // 💡 String으로 전달 [cite: 2026-02-16]
-              ),
-            ),
-          ],
+        closetStatsAsync.when(
+          data: (stats) {
+            final boughtCount = stats?.boughtCount ?? 0;
+            final boughtPrice = stats?.boughtPrice ?? 0;
+            final droppedCount = stats?.droppedCount ?? 0;
+            final droppedPrice = stats?.droppedPrice ?? 0;
+
+            return Row(
+              children: [
+                Expanded(
+                  child: ClosetStatCard(
+                    title: '고심 끝에 구매한 옷',
+                    count: boughtCount,
+                    price: '${_formatPrice(boughtPrice)}원',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ClosetStatCard(
+                    title: '아쉽지만 포기한 옷',
+                    count: droppedCount,
+                    price: '${_formatPrice(droppedPrice)}원',
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const Center(child: Text("불러오기 실패")),
         ),
       ],
     );

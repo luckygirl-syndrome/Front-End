@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/core/widgets/app_button.dart';
@@ -102,13 +101,8 @@ class _TermsAgreementSheetState extends State<TermsAgreementSheet> {
               borderRadius: 8,
               onPressed: canProceed
                   ? () {
-                      Navigator.pop(context);
-                      try {
-                        context.push('/login');
-                      } catch (e) {
-                        debugPrint(
-                            'standalone test mode: context.push route not found');
-                      }
+                      // Return true to caller so caller can decide navigation.
+                      Navigator.pop(context, true);
                     }
                   : () {}, // 비활성 시 아무 작업 안 함
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ttobaba/core/auth/auth_provider.dart';
 
 // 1. 공통 위젯들
 import '../../../core/widgets/app_backbar.dart';
@@ -10,6 +11,7 @@ import '../../../core/widgets/app_backbar.dart';
 import '../providers/signup_provider.dart';
 import '../widgets/signup_body.dart';
 import '../widgets/signup_footer.dart';
+import 'package:ttobaba/features/onboarding/widgets/terms_agreement_sheet.dart';
 
 class SignupScreen extends ConsumerWidget {
   // 이제 StatefulWidget일 필요도 없음!
@@ -46,8 +48,22 @@ class SignupScreen extends ConsumerWidget {
               SignupFooter(
                 currentPage: state.currentPage,
                 isPageValid: notifier.isCurrentPageValid(),
-                onNextPressed: () =>
-                    notifier.next(() => context.push('/sbti_start')),
+                onNextPressed: () => notifier.next(() {
+                  // show terms agreement sheet after signup completion
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => TermsAgreementSheet(),
+                  ).then((result) async {
+                    if (result == true && context.mounted) {
+                      // Navigate to SBTI start using go() which replaces the current stack.
+                      // Then refresh auth state so that other parts of the app know we're logged in.
+                      context.go('/sbti_start');
+                      ref.read(authStateProvider.notifier).refresh();
+                    }
+                  });
+                }),
               ),
             ],
           ),

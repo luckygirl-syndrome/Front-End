@@ -7,7 +7,7 @@ import 'package:ttobaba/core/network/dio_provider.dart';
 
 part 'persona_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PersonaState extends _$PersonaState {
   @override
   FutureOr<Persona?> build() async {

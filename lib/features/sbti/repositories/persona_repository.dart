@@ -19,7 +19,16 @@ class PersonaRepository {
   Future<Persona?> getPersona() async {
     try {
       final response = await _dio.get('/api/profile/persona');
-      return PersonaResponse.fromJson(response.data).persona;
+      final data = response.data;
+
+      // Handle direct persona object or wrapped object
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey('persona') && data['persona'] != null) {
+          return Persona.fromJson(data['persona']);
+        }
+        return Persona.fromJson(data);
+      }
+      return null;
     } catch (e) {
       rethrow;
     }
@@ -30,10 +39,7 @@ class PersonaRepository {
       final body = persona.toJson();
       debugPrint("🚀 [REQ BODY] ${jsonEncode(body)}");
 
-      await _dio.put(
-        '/api/profile/persona',
-        data: body,
-      );
+      await _dio.put('/api/profile/persona', data: body);
     } catch (e) {
       rethrow;
     }

@@ -48,6 +48,7 @@ class MyPageScreen extends ConsumerWidget {
                     ProfileHeader(
                       profile: profile,
                       personaType: personaAsync.value?.personaType,
+                      isLoadingPersona: personaAsync.isLoading,
                     ),
                     // 2. 하단 콘텐츠 영역
                     _buildMainContent(context, state, ref),
@@ -86,7 +87,10 @@ class MyPageScreen extends ConsumerWidget {
   }
 
   Widget _buildMainContent(
-      BuildContext context, MyPageState state, WidgetRef ref) {
+    BuildContext context,
+    MyPageState state,
+    WidgetRef ref,
+  ) {
     return Container(
       width: double.infinity,
       color: AppColors.white,
@@ -145,9 +149,9 @@ class MyPageScreen extends ConsumerWidget {
                 children: [
                   Text(
                     '다시 설정하기',
-                    style: AppTextStyles.ptdRegular(12).copyWith(
-                      color: AppColors.grey,
-                    ),
+                    style: AppTextStyles.ptdRegular(
+                      12,
+                    ).copyWith(color: AppColors.grey),
                   ),
                   const SizedBox(width: 4),
                   const Icon(
@@ -177,8 +181,9 @@ class MyPageScreen extends ConsumerWidget {
       children: [
         // 1. 헤더 영역 (나의 취향 + 다시 설정하기)
         Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 0.0), // 헤더 좌우 여백 미세 조정
+          padding: const EdgeInsets.symmetric(
+            horizontal: 0.0,
+          ), // 헤더 좌우 여백 미세 조정
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -193,9 +198,9 @@ class MyPageScreen extends ConsumerWidget {
                   children: [
                     Text(
                       '다시 설정하기',
-                      style: AppTextStyles.ptdRegular(12).copyWith(
-                        color: AppColors.grey,
-                      ),
+                      style: AppTextStyles.ptdRegular(
+                        12,
+                      ).copyWith(color: AppColors.grey),
                     ),
                     const SizedBox(width: 4),
                     const Icon(
@@ -210,7 +215,6 @@ class MyPageScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 20), // 헤더와 카드 사이 간격
-
         // 2. 쇼핑몰 카드 (실제 데이터 연동)
         _buildTasteCard(
           title: '내가 자주 이용하는 쇼핑몰',
@@ -223,7 +227,6 @@ class MyPageScreen extends ConsumerWidget {
         ),
 
         const SizedBox(height: 12), // 카드 사이 간격
-
         // 3. 추구미 카드 (실제 데이터 연동)
         _buildTasteCard(
           title: '나의 추구미',
@@ -285,7 +288,9 @@ class MyPageScreen extends ConsumerWidget {
   // 콤마 포맷팅 헬퍼
   String _formatPrice(int price) {
     return price.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 
   // 나의 옷장 섹션 상세 [cite: 2026-02-16]

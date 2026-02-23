@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ttobaba/features/onboarding/widgets/terms_agreement_sheet.dart';
 import 'package:ttobaba/core/widgets/app_indicator.dart';
 
@@ -22,12 +24,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _showTermsSheet() {
+    // await result and navigate when confirmed inside the sheet
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const TermsAgreementSheet(),
-    );
+    ).then((result) async {
+      if (result == true) {
+        try {
+          // mark onboarding as seen so future app starts go to login instead
+          const storage = FlutterSecureStorage();
+          await storage.write(key: 'has_seen_onboarding', value: 'true');
+        } catch (e) {
+          // ignore storage errors; still proceed
+        }
+
+        if (!mounted) return;
+        try {
+          context.push('/login');
+        } catch (e) {
+          // ignore if route not available in test
+        }
+      }
+    });
   }
 
   @override

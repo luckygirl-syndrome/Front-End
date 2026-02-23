@@ -27,7 +27,7 @@ class TasteUpdateCompleteScreen extends StatelessWidget {
                     AppColors.white,
                     AppColors.white,
                     AppColors.primaryMain,
-                    AppColors.white
+                    AppColors.white,
                   ],
                   stops: [0.0, 0.35, 0.351, 0.9],
                 ),
@@ -39,7 +39,7 @@ class TasteUpdateCompleteScreen extends StatelessWidget {
           Center(
             child: Image.asset(
               'assets/images/avatars/image 201-1.png',
-              height: 96,
+              height: 120,
             ),
           ),
 

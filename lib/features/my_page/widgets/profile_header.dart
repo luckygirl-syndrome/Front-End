@@ -16,10 +16,17 @@ import 'package:ttobaba/core/auth/auth_provider.dart';
 class ProfileHeader extends ConsumerWidget {
   final UserProfile profile; // 서버에서 가져온 이름, 이미지 인덱스
   final String? personaType; // 서버에서 가져온 페르소나 3자리 타입 (DAM, NAT 등)
+  final bool isLoadingPersona;
 
-  const ProfileHeader({required this.profile, this.personaType, super.key});
+  const ProfileHeader({
+    required this.profile,
+    this.personaType,
+    this.isLoadingPersona = false,
+    super.key,
+  });
 
   String _getPersonaName(String? type) {
+    if (isLoadingPersona) return '유형 분석 중...';
     switch (type) {
       case 'DAM':
         return '직관적 탐미가';

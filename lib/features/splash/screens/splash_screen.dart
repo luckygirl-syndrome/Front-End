@@ -32,11 +32,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     if (!mounted) return;
 
-    // 3. 이동
+    // 3. 이동 로직: 토큰이 있으면 홈으로, 없으면 바로 로그인으로 이동
     if (token != null && token.isNotEmpty) {
       context.go('/home');
     } else {
-      context.go('/onboarding');
+      context.go('/login');
     }
   }
 

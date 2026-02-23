@@ -1,26 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ttobaba/core/widgets/link_input_popup.dart';
-import 'package:ttobaba/features/products/providers/product_provider.dart';
 import 'package:ttobaba/features/chat/providers/chat_provider.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/core/widgets/app_navbar.dart';
 import 'package:ttobaba/features/chat/widgets/chat_item.dart';
+import 'package:ttobaba/features/chat/screens/detail_chat_screen.dart';
 
-class ChatListScreen extends ConsumerStatefulWidget {
+class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
 
   @override
-  ConsumerState<ChatListScreen> createState() => _ChatListScreenState();
-}
-
-class _ChatListScreenState extends ConsumerState<ChatListScreen> {
-  int _selectedTabIndex = 0; // 0: 전체, 1: 결정 완료, 2: 고민 중
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.white,
       // 1. 전체 구조를 Column으로 잡아 상단을 고정함 [cite: 2026-02-16]
@@ -28,11 +20,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         children: [
           _buildFixedTitleHeader(), // 고정 타이틀 영역
           Expanded(
-            child: _buildScrollableBody(context), // 스크롤 가능 영역
+            child: _buildScrollableBody(context, ref), // 스크롤 가능 영역
           ),
         ],
       ),
-      floatingActionButton: _buildFAB(context),
+      floatingActionButton: _buildFAB(),
       bottomNavigationBar: AppNavbar(
         currentIndex: 0,
         onTap: (index) {
@@ -66,7 +58,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   }
 
   // 스크롤 가능한 본문 영역
-  Widget _buildScrollableBody(BuildContext context) {
+  Widget _buildScrollableBody(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -97,7 +89,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               children: [
                 _buildFilterRow(),
                 const SizedBox(height: 24),
-                _buildChatList(context),
+                _buildChatList(context, ref),
               ],
             ),
           ),
@@ -136,9 +128,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               price: "13,410원",
               date: "어제",
               title: "[단독] [🔴라이브특가/+뉴컬러/50만장돌파🏆/made] 시오 니트",
-              imageUrl: "assets/images/products/product_sample.png",
+              imageUrl: "assets/images/product_sample.png",
               onTap: () {
-                context.push('/detail_chat');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const DetailChatScreen()),
+                );
               },
             ),
           ],
@@ -150,66 +146,35 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget _buildFilterRow() {
     return Row(
       children: [
-        _buildFilterChip("전체", index: 0),
+        _buildFilterChip("전체", isSelected: true),
         const SizedBox(width: 12),
-        _buildFilterChip("결정 완료", index: 1),
+        _buildFilterChip("결정 완료"),
         const SizedBox(width: 12),
-        _buildFilterChip("고민 중", index: 2),
+        _buildFilterChip("고민 중"),
       ],
     );
   }
 
-  Widget _buildFilterChip(String label, {required int index}) {
-    final isSelected = _selectedTabIndex == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTabIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryMain : AppColors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-              color: isSelected ? Colors.transparent : AppColors.primaryMain),
-        ),
-        child: Text(
-          label,
-          style: isSelected
-              ? AppTextStyles.ptdBold(12).copyWith(color: AppColors.white)
-              : AppTextStyles.ptdMedium(12)
-                  .copyWith(color: AppColors.primaryMain),
-        ),
+  Widget _buildFilterChip(String label, {bool isSelected = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.primaryMain : AppColors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+            color: isSelected ? Colors.transparent : AppColors.primaryMain),
       ),
+      child: Text(label, style: AppTextStyles.ptdMedium(12)),
     );
   }
 
-  Widget _buildChatList(BuildContext context) {
+  Widget _buildChatList(BuildContext context, WidgetRef ref) {
     // 1. Provider 구독
     final chatState = ref.watch(chatProvider);
-
-    // 2. 탭에 따른 필터링 적용
-    final chatList = chatState.chatList.where((chat) {
-      if (_selectedTabIndex == 0) return true; // 전체
-      final status = chat['status'];
-      if (_selectedTabIndex == 1) {
-        return status == 'purchased' || status == 'gaveUp'; // 결정 완료
-      } else {
-        return status == 'considering'; // 고민 중
-      }
-    }).toList();
+    final chatList = chatState.chatList;
 
     if (chatState.isLoading) {
       return const Center(child: CircularProgressIndicator());
-    }
-
-    if (chatList.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: Text("해당하는 대화가 없습니다.")),
-      );
     }
 
     return ListView.separated(
@@ -221,35 +186,28 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           const Divider(height: 32, thickness: 0.5),
       itemBuilder: (context, index) {
         final chat = chatList[index];
-
-        // 상태값 변환
-        ItemStatus itemStatus;
-        switch (chat['status']) {
-          case 'purchased':
-            itemStatus = ItemStatus.purchased;
-            break;
-          case 'gaveUp':
-            itemStatus = ItemStatus.gaveUp;
-            break;
-          default:
-            itemStatus = ItemStatus.considering;
-        }
-
         return ChatItem(
-          status: itemStatus,
+          status: ItemStatus.considering, // 실제 데이터 연동 시 변경 필요
           price: chat['price'],
           date: chat['date'],
           title: chat['title'],
           imageUrl: chat['imageUrl'],
           onTap: () {
-            context.push('/detail_chat', extra: itemStatus);
+            // GoRouter로 이동 (추후 라우터 설정 후 적용)
+            // context.push('/detail_chat');
+
+            // 현재는 기존 방식 유지하되, 추후 수정
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DetailChatScreen()),
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildFAB(BuildContext context) {
+  Widget _buildFAB() {
     return Padding(
       padding: const EdgeInsets.only(right: 24, bottom: 24),
       child: Container(
@@ -268,25 +226,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             width: 64,
             height: 64,
             child: FloatingActionButton(
-              onPressed: () async {
-                final url = await showDialog<String>(
-                  context: context,
-                  barrierDismissible: true, // 배경 클릭 시 닫기 허용 [cite: 2026-01-02]
-                  builder: (context) => const LinkInputPopup(),
-                );
-
-                // URL이 입력된 경우에만 상품 분석 API 호출
-                if (url != null && url.isNotEmpty) {
-                  final result = await ref
-                      .read(productParseProvider.notifier)
-                      .parseProduct(url);
-
-                  if (result != null && context.mounted) {
-                    // TODO: 분석 결과를 detail_chat 화면으로 전달
-                    context.push('/detail_chat');
-                  }
-                }
-              },
+              onPressed: () {},
               backgroundColor: AppColors.primaryMain,
               shape: const CircleBorder(),
               elevation: 0, // 👈 요청하신 대로 elevation 제거 (기본 그림자 삭제)

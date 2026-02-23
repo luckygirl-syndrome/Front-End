@@ -16,8 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl:
-          "https://transgressive-microseismical-jacquelyne.ngrok-free.dev", // API Base URL (ngrok 터널링 적용)
+      baseUrl: "http://172.31.99.74:8000", // API Base URL (로컬 백엔드 서버)
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       contentType: 'application/json',

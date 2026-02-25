@@ -1508,3 +1508,567 @@ abstract class _ReceiptListResponse implements ReceiptListResponse {
   _$$ReceiptListResponseImplCopyWith<_$ReceiptListResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+ReceiptDetail _$ReceiptDetailFromJson(Map<String, dynamic> json) {
+  return _ReceiptDetail.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ReceiptDetail {
+  @JsonKey(name: 'user_product_id')
+  int get userProductId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mall_name')
+  String? get mallName => throw _privateConstructorUsedError;
+  String? get brand => throw _privateConstructorUsedError;
+  @JsonKey(name: 'product_name')
+  String get productName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'product_img')
+  String? get productImg => throw _privateConstructorUsedError;
+  int get price => throw _privateConstructorUsedError;
+  @JsonKey(name: 'discount_rate')
+  double? get discountRate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'saved_amount')
+  int? get savedAmount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'completed_at')
+  String? get completedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'duration_days')
+  int? get durationDays => throw _privateConstructorUsedError;
+
+  /// Serializes this ReceiptDetail to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ReceiptDetail
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ReceiptDetailCopyWith<ReceiptDetail> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ReceiptDetailCopyWith<$Res> {
+  factory $ReceiptDetailCopyWith(
+          ReceiptDetail value, $Res Function(ReceiptDetail) then) =
+      _$ReceiptDetailCopyWithImpl<$Res, ReceiptDetail>;
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'user_product_id') int userProductId,
+      @JsonKey(name: 'mall_name') String? mallName,
+      String? brand,
+      @JsonKey(name: 'product_name') String productName,
+      @JsonKey(name: 'product_img') String? productImg,
+      int price,
+      @JsonKey(name: 'discount_rate') double? discountRate,
+      @JsonKey(name: 'saved_amount') int? savedAmount,
+      @JsonKey(name: 'completed_at') String? completedAt,
+      @JsonKey(name: 'duration_days') int? durationDays});
+}
+
+/// @nodoc
+class _$ReceiptDetailCopyWithImpl<$Res, $Val extends ReceiptDetail>
+    implements $ReceiptDetailCopyWith<$Res> {
+  _$ReceiptDetailCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ReceiptDetail
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userProductId = null,
+    Object? mallName = freezed,
+    Object? brand = freezed,
+    Object? productName = null,
+    Object? productImg = freezed,
+    Object? price = null,
+    Object? discountRate = freezed,
+    Object? savedAmount = freezed,
+    Object? completedAt = freezed,
+    Object? durationDays = freezed,
+  }) {
+    return _then(_value.copyWith(
+      userProductId: null == userProductId
+          ? _value.userProductId
+          : userProductId // ignore: cast_nullable_to_non_nullable
+              as int,
+      mallName: freezed == mallName
+          ? _value.mallName
+          : mallName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      productName: null == productName
+          ? _value.productName
+          : productName // ignore: cast_nullable_to_non_nullable
+              as String,
+      productImg: freezed == productImg
+          ? _value.productImg
+          : productImg // ignore: cast_nullable_to_non_nullable
+              as String?,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as int,
+      discountRate: freezed == discountRate
+          ? _value.discountRate
+          : discountRate // ignore: cast_nullable_to_non_nullable
+              as double?,
+      savedAmount: freezed == savedAmount
+          ? _value.savedAmount
+          : savedAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+      durationDays: freezed == durationDays
+          ? _value.durationDays
+          : durationDays // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ReceiptDetailImplCopyWith<$Res>
+    implements $ReceiptDetailCopyWith<$Res> {
+  factory _$$ReceiptDetailImplCopyWith(
+          _$ReceiptDetailImpl value, $Res Function(_$ReceiptDetailImpl) then) =
+      __$$ReceiptDetailImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(name: 'user_product_id') int userProductId,
+      @JsonKey(name: 'mall_name') String? mallName,
+      String? brand,
+      @JsonKey(name: 'product_name') String productName,
+      @JsonKey(name: 'product_img') String? productImg,
+      int price,
+      @JsonKey(name: 'discount_rate') double? discountRate,
+      @JsonKey(name: 'saved_amount') int? savedAmount,
+      @JsonKey(name: 'completed_at') String? completedAt,
+      @JsonKey(name: 'duration_days') int? durationDays});
+}
+
+/// @nodoc
+class __$$ReceiptDetailImplCopyWithImpl<$Res>
+    extends _$ReceiptDetailCopyWithImpl<$Res, _$ReceiptDetailImpl>
+    implements _$$ReceiptDetailImplCopyWith<$Res> {
+  __$$ReceiptDetailImplCopyWithImpl(
+      _$ReceiptDetailImpl _value, $Res Function(_$ReceiptDetailImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ReceiptDetail
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userProductId = null,
+    Object? mallName = freezed,
+    Object? brand = freezed,
+    Object? productName = null,
+    Object? productImg = freezed,
+    Object? price = null,
+    Object? discountRate = freezed,
+    Object? savedAmount = freezed,
+    Object? completedAt = freezed,
+    Object? durationDays = freezed,
+  }) {
+    return _then(_$ReceiptDetailImpl(
+      userProductId: null == userProductId
+          ? _value.userProductId
+          : userProductId // ignore: cast_nullable_to_non_nullable
+              as int,
+      mallName: freezed == mallName
+          ? _value.mallName
+          : mallName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      brand: freezed == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      productName: null == productName
+          ? _value.productName
+          : productName // ignore: cast_nullable_to_non_nullable
+              as String,
+      productImg: freezed == productImg
+          ? _value.productImg
+          : productImg // ignore: cast_nullable_to_non_nullable
+              as String?,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as int,
+      discountRate: freezed == discountRate
+          ? _value.discountRate
+          : discountRate // ignore: cast_nullable_to_non_nullable
+              as double?,
+      savedAmount: freezed == savedAmount
+          ? _value.savedAmount
+          : savedAmount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+      durationDays: freezed == durationDays
+          ? _value.durationDays
+          : durationDays // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ReceiptDetailImpl implements _ReceiptDetail {
+  const _$ReceiptDetailImpl(
+      {@JsonKey(name: 'user_product_id') required this.userProductId,
+      @JsonKey(name: 'mall_name') this.mallName,
+      this.brand,
+      @JsonKey(name: 'product_name') required this.productName,
+      @JsonKey(name: 'product_img') this.productImg,
+      required this.price,
+      @JsonKey(name: 'discount_rate') this.discountRate,
+      @JsonKey(name: 'saved_amount') this.savedAmount,
+      @JsonKey(name: 'completed_at') this.completedAt,
+      @JsonKey(name: 'duration_days') this.durationDays});
+
+  factory _$ReceiptDetailImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ReceiptDetailImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'user_product_id')
+  final int userProductId;
+  @override
+  @JsonKey(name: 'mall_name')
+  final String? mallName;
+  @override
+  final String? brand;
+  @override
+  @JsonKey(name: 'product_name')
+  final String productName;
+  @override
+  @JsonKey(name: 'product_img')
+  final String? productImg;
+  @override
+  final int price;
+  @override
+  @JsonKey(name: 'discount_rate')
+  final double? discountRate;
+  @override
+  @JsonKey(name: 'saved_amount')
+  final int? savedAmount;
+  @override
+  @JsonKey(name: 'completed_at')
+  final String? completedAt;
+  @override
+  @JsonKey(name: 'duration_days')
+  final int? durationDays;
+
+  @override
+  String toString() {
+    return 'ReceiptDetail(userProductId: $userProductId, mallName: $mallName, brand: $brand, productName: $productName, productImg: $productImg, price: $price, discountRate: $discountRate, savedAmount: $savedAmount, completedAt: $completedAt, durationDays: $durationDays)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ReceiptDetailImpl &&
+            (identical(other.userProductId, userProductId) ||
+                other.userProductId == userProductId) &&
+            (identical(other.mallName, mallName) ||
+                other.mallName == mallName) &&
+            (identical(other.brand, brand) || other.brand == brand) &&
+            (identical(other.productName, productName) ||
+                other.productName == productName) &&
+            (identical(other.productImg, productImg) ||
+                other.productImg == productImg) &&
+            (identical(other.price, price) || other.price == price) &&
+            (identical(other.discountRate, discountRate) ||
+                other.discountRate == discountRate) &&
+            (identical(other.savedAmount, savedAmount) ||
+                other.savedAmount == savedAmount) &&
+            (identical(other.completedAt, completedAt) ||
+                other.completedAt == completedAt) &&
+            (identical(other.durationDays, durationDays) ||
+                other.durationDays == durationDays));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      userProductId,
+      mallName,
+      brand,
+      productName,
+      productImg,
+      price,
+      discountRate,
+      savedAmount,
+      completedAt,
+      durationDays);
+
+  /// Create a copy of ReceiptDetail
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ReceiptDetailImplCopyWith<_$ReceiptDetailImpl> get copyWith =>
+      __$$ReceiptDetailImplCopyWithImpl<_$ReceiptDetailImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ReceiptDetailImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ReceiptDetail implements ReceiptDetail {
+  const factory _ReceiptDetail(
+          {@JsonKey(name: 'user_product_id') required final int userProductId,
+          @JsonKey(name: 'mall_name') final String? mallName,
+          final String? brand,
+          @JsonKey(name: 'product_name') required final String productName,
+          @JsonKey(name: 'product_img') final String? productImg,
+          required final int price,
+          @JsonKey(name: 'discount_rate') final double? discountRate,
+          @JsonKey(name: 'saved_amount') final int? savedAmount,
+          @JsonKey(name: 'completed_at') final String? completedAt,
+          @JsonKey(name: 'duration_days') final int? durationDays}) =
+      _$ReceiptDetailImpl;
+
+  factory _ReceiptDetail.fromJson(Map<String, dynamic> json) =
+      _$ReceiptDetailImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'user_product_id')
+  int get userProductId;
+  @override
+  @JsonKey(name: 'mall_name')
+  String? get mallName;
+  @override
+  String? get brand;
+  @override
+  @JsonKey(name: 'product_name')
+  String get productName;
+  @override
+  @JsonKey(name: 'product_img')
+  String? get productImg;
+  @override
+  int get price;
+  @override
+  @JsonKey(name: 'discount_rate')
+  double? get discountRate;
+  @override
+  @JsonKey(name: 'saved_amount')
+  int? get savedAmount;
+  @override
+  @JsonKey(name: 'completed_at')
+  String? get completedAt;
+  @override
+  @JsonKey(name: 'duration_days')
+  int? get durationDays;
+
+  /// Create a copy of ReceiptDetail
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ReceiptDetailImplCopyWith<_$ReceiptDetailImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ReceiptDetailResponse _$ReceiptDetailResponseFromJson(
+    Map<String, dynamic> json) {
+  return _ReceiptDetailResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ReceiptDetailResponse {
+  String get status => throw _privateConstructorUsedError;
+  ReceiptDetail get data => throw _privateConstructorUsedError;
+
+  /// Serializes this ReceiptDetailResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ReceiptDetailResponseCopyWith<ReceiptDetailResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ReceiptDetailResponseCopyWith<$Res> {
+  factory $ReceiptDetailResponseCopyWith(ReceiptDetailResponse value,
+          $Res Function(ReceiptDetailResponse) then) =
+      _$ReceiptDetailResponseCopyWithImpl<$Res, ReceiptDetailResponse>;
+  @useResult
+  $Res call({String status, ReceiptDetail data});
+
+  $ReceiptDetailCopyWith<$Res> get data;
+}
+
+/// @nodoc
+class _$ReceiptDetailResponseCopyWithImpl<$Res,
+        $Val extends ReceiptDetailResponse>
+    implements $ReceiptDetailResponseCopyWith<$Res> {
+  _$ReceiptDetailResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? data = null,
+  }) {
+    return _then(_value.copyWith(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      data: null == data
+          ? _value.data
+          : data // ignore: cast_nullable_to_non_nullable
+              as ReceiptDetail,
+    ) as $Val);
+  }
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ReceiptDetailCopyWith<$Res> get data {
+    return $ReceiptDetailCopyWith<$Res>(_value.data, (value) {
+      return _then(_value.copyWith(data: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$ReceiptDetailResponseImplCopyWith<$Res>
+    implements $ReceiptDetailResponseCopyWith<$Res> {
+  factory _$$ReceiptDetailResponseImplCopyWith(
+          _$ReceiptDetailResponseImpl value,
+          $Res Function(_$ReceiptDetailResponseImpl) then) =
+      __$$ReceiptDetailResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String status, ReceiptDetail data});
+
+  @override
+  $ReceiptDetailCopyWith<$Res> get data;
+}
+
+/// @nodoc
+class __$$ReceiptDetailResponseImplCopyWithImpl<$Res>
+    extends _$ReceiptDetailResponseCopyWithImpl<$Res,
+        _$ReceiptDetailResponseImpl>
+    implements _$$ReceiptDetailResponseImplCopyWith<$Res> {
+  __$$ReceiptDetailResponseImplCopyWithImpl(_$ReceiptDetailResponseImpl _value,
+      $Res Function(_$ReceiptDetailResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? status = null,
+    Object? data = null,
+  }) {
+    return _then(_$ReceiptDetailResponseImpl(
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      data: null == data
+          ? _value.data
+          : data // ignore: cast_nullable_to_non_nullable
+              as ReceiptDetail,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ReceiptDetailResponseImpl implements _ReceiptDetailResponse {
+  const _$ReceiptDetailResponseImpl({required this.status, required this.data});
+
+  factory _$ReceiptDetailResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ReceiptDetailResponseImplFromJson(json);
+
+  @override
+  final String status;
+  @override
+  final ReceiptDetail data;
+
+  @override
+  String toString() {
+    return 'ReceiptDetailResponse(status: $status, data: $data)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ReceiptDetailResponseImpl &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.data, data) || other.data == data));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, status, data);
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ReceiptDetailResponseImplCopyWith<_$ReceiptDetailResponseImpl>
+      get copyWith => __$$ReceiptDetailResponseImplCopyWithImpl<
+          _$ReceiptDetailResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ReceiptDetailResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ReceiptDetailResponse implements ReceiptDetailResponse {
+  const factory _ReceiptDetailResponse(
+      {required final String status,
+      required final ReceiptDetail data}) = _$ReceiptDetailResponseImpl;
+
+  factory _ReceiptDetailResponse.fromJson(Map<String, dynamic> json) =
+      _$ReceiptDetailResponseImpl.fromJson;
+
+  @override
+  String get status;
+  @override
+  ReceiptDetail get data;
+
+  /// Create a copy of ReceiptDetailResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ReceiptDetailResponseImplCopyWith<_$ReceiptDetailResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}

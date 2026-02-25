@@ -17,23 +17,26 @@ class HomeRepository {
     try {
       debugPrint("📡 [HomeRepository] Requesting: GET /api/dashboard/home");
       final response = await _dio.get('/api/dashboard/home');
-      
+
       // ✅ 상태 코드 확인
       debugPrint("📡 [HomeRepository] Status Code: ${response.statusCode}");
-      
+
       if (response.statusCode != 200) {
         debugPrint("⚠️  [HomeRepository] Non-200 Response: ${response.data}");
-        throw Exception("Dashboard API Error: ${response.data['detail'] ?? 'Unknown error'}");
+        throw Exception(
+            "Dashboard API Error: ${response.data['detail'] ?? 'Unknown error'}");
       }
-      
+
       debugPrint("📡 [HomeRepository] Full Response: ${response.data}");
-      debugPrint("📡 [HomeRepository] Response Type: ${response.data.runtimeType}");
-      
+      debugPrint(
+          "📡 [HomeRepository] Response Type: ${response.data.runtimeType}");
+
       // 응답이 List인 경우
       if (response.data is List) {
-        debugPrint("⚠️  Response is a List, not Map. First item: ${(response.data as List).isNotEmpty ? (response.data as List)[0] : 'empty'}");
+        debugPrint(
+            "⚠️  Response is a List, not Map. First item: ${(response.data as List).isNotEmpty ? (response.data as List)[0] : 'empty'}");
       }
-      
+
       return response.data as Map<String, dynamic>;
     } catch (e) {
       debugPrint("📡 [HomeRepository] Error: $e");
@@ -58,6 +61,15 @@ class HomeRepository {
       // Response structure: { "status": "...", "data": [...] }
       final json = response.data as Map<String, dynamic>;
       return List<Map<String, dynamic>>.from(json['data']);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getReceiptDetail(int userProductId) async {
+    try {
+      final response = await _dio.get('/api/dashboard/receipts/$userProductId');
+      return response.data as Map<String, dynamic>;
     } catch (e) {
       rethrow;
     }

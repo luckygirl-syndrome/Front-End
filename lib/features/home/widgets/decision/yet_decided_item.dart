@@ -62,40 +62,43 @@ class YetDecidedItem extends StatelessWidget {
 
           // 오른쪽: 텍스트 영역
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.ptdMedium(14).copyWith(
-                    color: AppColors.black,
-                    height: 1.4,
+            child: SizedBox(
+              height: 80,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.ptdMedium(14).copyWith(
+                      color: AppColors.black,
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        price,
-                        style: AppTextStyles.ptdBold(16)
-                            .copyWith(color: AppColors.black),
-                        overflow: TextOverflow.ellipsis,
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          price,
+                          style: AppTextStyles.ptdBold(16)
+                              .copyWith(color: AppColors.black),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      dateTag,
-                      style: AppTextStyles.ptdRegular(12)
-                          .copyWith(color: AppColors.grey),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 8),
+                      Text(
+                        dateTag,
+                        style: AppTextStyles.ptdRegular(12)
+                            .copyWith(color: AppColors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

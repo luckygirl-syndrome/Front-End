@@ -125,3 +125,45 @@ Map<String, dynamic> _$$ReceiptListResponseImplToJson(
       'status': instance.status,
       'data': instance.data,
     };
+
+_$ReceiptDetailImpl _$$ReceiptDetailImplFromJson(Map<String, dynamic> json) =>
+    _$ReceiptDetailImpl(
+      userProductId: (json['user_product_id'] as num).toInt(),
+      mallName: json['mall_name'] as String?,
+      brand: json['brand'] as String?,
+      productName: json['product_name'] as String,
+      productImg: json['product_img'] as String?,
+      price: (json['price'] as num).toInt(),
+      discountRate: (json['discount_rate'] as num?)?.toDouble(),
+      savedAmount: (json['saved_amount'] as num?)?.toInt(),
+      completedAt: json['completed_at'] as String?,
+      durationDays: (json['duration_days'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$$ReceiptDetailImplToJson(_$ReceiptDetailImpl instance) =>
+    <String, dynamic>{
+      'user_product_id': instance.userProductId,
+      'mall_name': instance.mallName,
+      'brand': instance.brand,
+      'product_name': instance.productName,
+      'product_img': instance.productImg,
+      'price': instance.price,
+      'discount_rate': instance.discountRate,
+      'saved_amount': instance.savedAmount,
+      'completed_at': instance.completedAt,
+      'duration_days': instance.durationDays,
+    };
+
+_$ReceiptDetailResponseImpl _$$ReceiptDetailResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ReceiptDetailResponseImpl(
+      status: json['status'] as String,
+      data: ReceiptDetail.fromJson(json['data'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$$ReceiptDetailResponseImplToJson(
+        _$ReceiptDetailResponseImpl instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+      'data': instance.data,
+    };

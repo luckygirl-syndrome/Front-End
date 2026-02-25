@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ttobaba/features/home/models/dashboard_model.dart';
 
 class DetailNoBuyReceiptCard extends StatelessWidget {
-  const DetailNoBuyReceiptCard({super.key});
+  final ReceiptDetail receipt;
+
+  const DetailNoBuyReceiptCard({
+    super.key,
+    required this.receipt,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +71,7 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
 
   Widget _buildLogo() {
     return SvgPicture.asset(
-      'assets/images/logos/logo.svg', // 2. 확장자 변경 [cite: 2025-11-27]
+      'assets/images/logos/logo.svg',
       height: 40,
       fit: BoxFit.contain,
     );
@@ -74,11 +81,10 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final boxWidth = constraints.constrainWidth();
-        const dashWidth = 4.0; // Dash: 4
-        const dashGap = 2.0; // Gap: 2
-        const dashHeight = 1.0; // Stroke weight: 1
+        const dashWidth = 4.0;
+        const dashGap = 2.0;
+        const dashHeight = 1.0;
 
-        // Dash와 Gap을 합친 총 너비(6.0)를 기준으로 개수 계산
         final dashCount = (boxWidth / (dashWidth + dashGap)).floor();
 
         return Row(
@@ -89,7 +95,6 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
               height: dashHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  // DarkScale/Black (1A) 색상 반영
                   color: AppColors.black,
                 ),
               ),
@@ -102,17 +107,15 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
 
   Widget _buildReceiptLabels() {
     return Row(
-      // 1. "안", "산", 그리고 "영수증 묶음" 사이를 균등 분할 배치합니다.
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildCircleLabel("안"),
         _buildCircleLabel("산"),
-        // 2. "영", "수", "증"은 별도의 Row로 묶어 8px 간격을 유지합니다.
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildCircleLabel("영"),
-            const SizedBox(width: 8), // spacedBy(8.dp) 반영
+            const SizedBox(width: 8),
             _buildCircleLabel("수"),
             const SizedBox(width: 8),
             _buildCircleLabel("증"),
@@ -142,29 +145,54 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            "[쇼핑몰] 무신사\n[브랜드] 블랙야크\n[의류명]\n여성 아이스제로 레이디 미들 다운자켓#2_LE",
+            "[쇼핑몰] ${receipt.mallName ?? '-'}\n[브랜드] ${receipt.brand ?? '-'}\n[의류명]\n${receipt.productName}",
             style: AppTextStyles.ptdMedium(12).copyWith(height: 1.6),
           ),
         ),
         const SizedBox(width: 12),
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            'assets/images/products/product_sample.png',
-            width: 80,
-            height: 80,
-            fit: BoxFit.cover,
-          ),
+          child: (receipt.productImg != null &&
+                  receipt.productImg!.startsWith('http'))
+              ? Image.network(
+                  receipt.productImg!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                )
+              : Image.asset(
+                  receipt.productImg ??
+                      'assets/images/products/product_sample.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                ),
         ),
       ],
     );
   }
 
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: AppColors.lightGrey,
+      child: const Icon(Icons.image_not_supported,
+          size: 24, color: AppColors.grey),
+    );
+  }
+
   Widget _buildSavingSummary() {
+    final formatter = NumberFormat.decimalPattern();
+    final discount = (receipt.discountRate ?? 0).toInt();
+
     return Column(
       children: [
-        _buildSummaryRow("참아낸 금액", "251,100원"),
-        _buildSummaryRow("참아낸 할인율", "37%"),
+        _buildSummaryRow(
+            "참아낸 금액", "${formatter.format(receipt.savedAmount ?? 0)}원"),
+        _buildSummaryRow("참아낸 할인율", "$discount%"),
         const SizedBox(height: 12),
       ],
     );
@@ -181,12 +209,20 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
   }
 
   Widget _buildApprovalInfo() {
+    String dateStr = '-';
+    if (receipt.completedAt != null) {
+      try {
+        final date = DateTime.parse(receipt.completedAt!);
+        dateStr = DateFormat('yyyy-MM-dd').format(date);
+      } catch (_) {}
+    }
+
     return Column(
       children: [
         Text("**** 신용승인정보 (고객용) ****", style: AppTextStyles.ptdMedium(12)),
         const SizedBox(height: 16),
-        _buildInfoRow("고민을 끝낸 날", "2026-02-05"),
-        _buildInfoRow("고민한 기간", "13일"),
+        _buildInfoRow("고민을 끝낸 날", dateStr),
+        _buildInfoRow("고민한 기간", "${receipt.durationDays ?? 0}일"),
         _buildInfoRow("승인/가맹점", "럭키걸신드롬"),
       ],
     );

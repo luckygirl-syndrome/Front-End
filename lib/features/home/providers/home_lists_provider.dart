@@ -19,3 +19,11 @@ Future<List<ReceiptListItem>> unboughtReceiptsList(
   final data = await repository.getUnboughtReceiptsList();
   return data.map((item) => ReceiptListItem.fromJson(item)).toList();
 }
+
+@riverpod
+Future<ReceiptDetail> receiptDetail(
+    ReceiptDetailRef ref, int userProductId) async {
+  final repository = ref.watch(homeRepositoryProvider);
+  final data = await repository.getReceiptDetail(userProductId);
+  return ReceiptDetailResponse.fromJson(data).data;
+}

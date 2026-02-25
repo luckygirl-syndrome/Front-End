@@ -89,3 +89,33 @@ class ReceiptListResponse with _$ReceiptListResponse {
   factory ReceiptListResponse.fromJson(Map<String, dynamic> json) =>
       _$ReceiptListResponseFromJson(json);
 }
+
+@freezed
+class ReceiptDetail with _$ReceiptDetail {
+  const factory ReceiptDetail({
+    @JsonKey(name: 'user_product_id') required int userProductId,
+    @JsonKey(name: 'mall_name') String? mallName,
+    String? brand,
+    @JsonKey(name: 'product_name') required String productName,
+    @JsonKey(name: 'product_img') String? productImg,
+    required int price,
+    @JsonKey(name: 'discount_rate') double? discountRate,
+    @JsonKey(name: 'saved_amount') int? savedAmount,
+    @JsonKey(name: 'completed_at') String? completedAt,
+    @JsonKey(name: 'duration_days') int? durationDays,
+  }) = _ReceiptDetail;
+
+  factory ReceiptDetail.fromJson(Map<String, dynamic> json) =>
+      _$ReceiptDetailFromJson(json);
+}
+
+@freezed
+class ReceiptDetailResponse with _$ReceiptDetailResponse {
+  const factory ReceiptDetailResponse({
+    required String status,
+    required ReceiptDetail data,
+  }) = _ReceiptDetailResponse;
+
+  factory ReceiptDetailResponse.fromJson(Map<String, dynamic> json) =>
+      _$ReceiptDetailResponseFromJson(json);
+}

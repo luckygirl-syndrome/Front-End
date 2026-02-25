@@ -8,6 +8,7 @@ import '../../features/initial_question/screens/initial_question_no_like_screen.
 import '../../features/initial_question/screens/initial_question_screen.dart';
 import '../../features/initial_question/screens/initial_question_start_screen.dart';
 import '../../features/initial_question/screens/taste_update_complete_screen.dart';
+import 'package:ttobaba/features/splash/screens/splash_screen.dart';
 import '../../features/login/screens/login_screen.dart';
 import '../../features/sbti/screens/sbti_no_like_screen.dart';
 import '../../features/sbti/screens/sbti_question_screen.dart';
@@ -40,7 +41,8 @@ final appRouterStateProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
-    initialLocation: '/home',
+    // 항상 스플래시에서 시작
+    initialLocation: '/splash',
     refreshListenable: notifier,
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
@@ -75,6 +77,11 @@ final appRouterStateProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // 스플래시
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       // 로그인 화면
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(

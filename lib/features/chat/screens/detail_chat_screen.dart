@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
@@ -11,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/chat_provider.dart';
 import '../models/chat_model.dart';
+import 'package:ttobaba/features/chat/widgets/final_score_overlay.dart';
 
 class DetailChatScreen extends ConsumerStatefulWidget {
   final int userProductId;
@@ -82,8 +84,33 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
   int _lastMessageCount = 0;
   bool _didInitialScrollToBottom = false;
   bool _chatEnded = false; // POST /api/chat/exit 호출 후 true
+  int? _finalScore; // LLM이 계산한 최종 점수 (exit 시 포함)
+  bool _showFinalScoreOverlay = false; // 종료 팝업 표시 여부
+  int? _displayScore; // 롤링/최종 표시용 점수
+  Timer? _scoreRollingTimer;
   /// finalize-survey 재시도에서 유효한 first_reply를 받았을 때. 오버레이 숨기고 채팅 시작.
   String? _pendingValidFirstReplyFromRetry;
+
+  void _startScoreRolling() {
+    _scoreRollingTimer?.cancel();
+    _scoreRollingTimer =
+        Timer.periodic(const Duration(milliseconds: 80), (timer) {
+      if (!mounted) return;
+      // 최종 점수를 받기 전까지만 슬롯머신처럼 숫자 변경
+      if (_finalScore != null) {
+        _stopScoreRolling();
+        return;
+      }
+      setState(() {
+        _displayScore = Random().nextInt(101); // 0~100
+      });
+    });
+  }
+
+  void _stopScoreRolling() {
+    _scoreRollingTimer?.cancel();
+    _scoreRollingTimer = null;
+  }
 
   @override
   void initState() {
@@ -97,6 +124,7 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
   @override
   void dispose() {
     _analysisRetryTimer?.cancel();
+    _scoreRollingTimer?.cancel();
     _spinnerController.dispose();
     _inputController.dispose();
     _scrollController.dispose();
@@ -300,32 +328,85 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
           ),
         ),
         if (showAnalysisOverlay) _buildAnalysisLoadingOverlay(ref),
+        if (_showFinalScoreOverlay)
+          FinalScoreOverlay(
+            finalScore: _displayScore ?? _finalScore ?? 0,
+            onClosePopup: () {
+              setState(() {
+                _showFinalScoreOverlay = false;
+              });
+              _stopScoreRolling();
+            },
+          ),
       ],
     );
   }
 
   /// POST /api/chat/exit 호출 후 입력창 위에 표시되는 종료 배너
+  /// (검은색 + 파란 "또바바 지수" 박스).
   Widget _buildChatEndedBanner() {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        decoration: const BoxDecoration(
-          color: AppColors.black,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
+    // 하단 바는 슬롯머신 없이 최종 점수만 노출
+    final scoreText = _finalScore?.toString() ?? ''; // 값 없으면 숫자 숨김
+
+    return Container(
+      width: double.infinity,
+      color: Colors.transparent,
+      child: Row(
+        children: [
+          // 왼쪽: 검은색 "채팅이 종료되었어요!" (Bold 20)
+          Expanded(
+            flex: 273,
+            child: Container(
+              height: 78,
+              decoration: const BoxDecoration(
+                color: AppColors.black,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                ),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              alignment: Alignment.center,
+              child: Text(
+                '채팅이 종료되었어요!',
+                style:
+                    AppTextStyles.ptdBold(20).copyWith(color: AppColors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-        ),
-        child: Text(
-          '채팅이 종료되었어요!',
-          style: AppTextStyles.ptdBold(20).copyWith(color: AppColors.white),
-          textAlign: TextAlign.center,
-        ),
+          // 오른쪽: 파란색 "또바바 지수" (Medium 16) + 점수 (ExtraBold 32)
+          Expanded(
+            flex: 117,
+            child: Container(
+              height: 78,
+              decoration: const BoxDecoration(
+                color: AppColors.secondaryMain,
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '또바바 지수',
+                    style: AppTextStyles.ptdMedium(16)
+                        .copyWith(color: AppColors.white),
+                  ),
+                  Text(
+                    scoreText,
+                    style: AppTextStyles.ptdExtraBold(24)
+                        .copyWith(color: AppColors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -405,11 +486,29 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
                         if (reply.isExit == true) {
                           debugPrint(
                               '🏁 [Chat] LLM 종료 응답 수신 → POST /api/chat/exit 호출');
-                          await ref
+
+                          // 1) 먼저 팝업 + 롤링 시작
+                          setState(() {
+                            _chatEnded = true;
+                            _showFinalScoreOverlay = true;
+                            _finalScore = null;
+                            _displayScore = null;
+                          });
+                          _startScoreRolling();
+
+                          // 2) 백엔드로 최종 점수 요청
+                          final exitReply = await ref
                               .read(chatProvider.notifier)
                               .exitChat(widget.userProductId);
+
                           if (mounted) {
-                            setState(() => _chatEnded = true);
+                            _stopScoreRolling();
+                            setState(() {
+                              _chatEnded = true;
+                              _finalScore =
+                                  exitReply?.finalScore ?? reply.finalScore;
+                              _displayScore = _finalScore;
+                            });
                             ref.refresh(
                                 chatRoomDetailProvider(widget.userProductId));
                           }
@@ -454,15 +553,27 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
     ChatRoomDetailResponse detail, {
     String? overrideFirstReply,
   }) {
-    if (detail.messages.length <= 8) return detail.messages;
+    List<ChatMessageResponse> _stripExit(List<ChatMessageResponse> list) {
+      if (list.isEmpty) return list;
+      final last = list.last;
+      if ((last.role ?? '').toLowerCase() == 'user' &&
+          last.message.trim() == '[EXIT]') {
+        return list.sublist(0, list.length - 1);
+      }
+      return list;
+    }
+
+    if (detail.messages.length <= 8) {
+      return _stripExit(detail.messages);
+    }
     const surveyCount = 8;
     final rest = detail.messages.sublist(surveyCount);
-    if (rest.isEmpty) return detail.messages;
+    if (rest.isEmpty) return _stripExit(detail.messages);
     int i = 0;
     while (i < rest.length && rest[i].role == 'assistant') {
       i++;
     }
-    if (i <= 1) return detail.messages;
+    if (i <= 1) return _stripExit(detail.messages);
     final firstReplyBlock = rest.sublist(0, i);
     ChatMessageResponse lastOnly = firstReplyBlock.last;
     if (overrideFirstReply != null) {
@@ -470,7 +581,7 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
     }
     final filtered =
         detail.messages.sublist(0, surveyCount) + [lastOnly] + rest.sublist(i);
-    return filtered;
+    return _stripExit(filtered);
   }
 
   int _itemCount(ChatRoomDetailResponse detail,

@@ -69,7 +69,7 @@ _$ChatReplyImpl _$$ChatReplyImplFromJson(Map<String, dynamic> json) =>
       userProductId: (json['user_product_id'] as num).toInt(),
       reply: json['reply'] as String?,
       isExit: json['is_exit'] as bool? ?? false,
-      decisionCode: json['decision_code'] as String?,
+      finalScore: (json['final_score'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$ChatReplyImplToJson(_$ChatReplyImpl instance) =>
@@ -77,7 +77,7 @@ Map<String, dynamic> _$$ChatReplyImplToJson(_$ChatReplyImpl instance) =>
       'user_product_id': instance.userProductId,
       'reply': instance.reply,
       'is_exit': instance.isExit,
-      'decision_code': instance.decisionCode,
+      'final_score': instance.finalScore,
     };
 
 _$ChatRoomDetailResponseImpl _$$ChatRoomDetailResponseImplFromJson(

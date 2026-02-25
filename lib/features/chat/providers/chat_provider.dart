@@ -217,13 +217,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
     return false;
   }
 
-  Future<void> exitChat(int userProductId) async {
+  Future<ChatReply?> exitChat(int userProductId) async {
     try {
       final repository = ref.read(chatRepositoryProvider);
-      await repository.exitChat(userProductId);
+      final reply = await repository.exitChat(userProductId);
       await loadChatList(); // 리스트 갱신 (종료 상태 반영)
+      return reply;
     } catch (e) {
       debugPrint("❌ [Exit Chat] Error: $e");
+      return null;
     }
   }
 

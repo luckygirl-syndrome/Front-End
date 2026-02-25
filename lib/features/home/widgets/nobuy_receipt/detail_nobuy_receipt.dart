@@ -141,13 +141,39 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
     );
   }
 
+  String _formatMallName(String? mallName) {
+    if (mallName == null || mallName.isEmpty) return '-';
+    final lower = mallName.toLowerCase();
+    switch (lower) {
+      case 'musinsa':
+        return '무신사';
+      case 'zigzag':
+        return '지그재그';
+      case 'ably':
+        return '에이블리';
+      default:
+        return mallName;
+    }
+  }
+
   Widget _buildProductSection() {
+    final mallName = _formatMallName(receipt.mallName);
+    final brandRaw = (receipt.brand ?? '').trim();
+    final hasBrand = brandRaw.isNotEmpty && brandRaw != '-';
+
+    final buffer = StringBuffer();
+    buffer.writeln("[쇼핑몰] $mallName");
+    if (hasBrand) {
+      buffer.writeln("[브랜드] $brandRaw");
+    }
+    buffer.write("[의류명] ${receipt.productName}");
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
-            "[쇼핑몰] ${receipt.mallName ?? '-'}\n[브랜드] ${receipt.brand ?? '-'}\n[의류명]\n${receipt.productName}",
+            buffer.toString(),
             style: AppTextStyles.ptdMedium(12).copyWith(height: 1.6),
           ),
         ),

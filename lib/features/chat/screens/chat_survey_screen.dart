@@ -60,7 +60,7 @@ class _ChatSurveyScreenState extends ConsumerState<ChatSurveyScreen>
     {
       'key': 'q2',
       'title': '기본 질문',
-      'question': '저한테\n연락한 이유가\n무엇인가요?',
+      'question': '또바한테\n연락한 이유가\n무엇인가요?',
       'options': [
         {'text': '사도 되는지 확인받고 싶어요', 'value': 1},
         {'text': '그냥 이 옷 어떤가 궁금해요', 'value': 2},

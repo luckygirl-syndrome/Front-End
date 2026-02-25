@@ -138,7 +138,7 @@ class ChatRepository {
     return null;
   }
 
-  Future<void> exitChat(int userProductId) async {
+  Future<ChatReply?> exitChat(int userProductId) async {
     try {
       // exit 시 백엔드가 LLM에 [EXIT] 보내고 응답 대기하므로 타임아웃 완화
       final response = await _dio.post(
@@ -146,6 +146,11 @@ class ChatRepository {
         options: Options(receiveTimeout: const Duration(seconds: 60)),
       );
       _validateResponse(response);
+      try {
+        return ChatReply.fromJson(response.data);
+      } catch (_) {
+        return null;
+      }
     } catch (e) {
       rethrow;
     }
@@ -241,6 +246,7 @@ class ChatRepository {
     debugPrint(line);
     debugPrint('  user_product_id: ${reply.userProductId}');
     debugPrint('  is_exit: ${reply.isExit}');
+    debugPrint('  final_score: ${reply.finalScore}');
     debugPrint('  reply:');
     final text = reply.reply ?? '(null)';
     for (final ln in text.split('\n')) {

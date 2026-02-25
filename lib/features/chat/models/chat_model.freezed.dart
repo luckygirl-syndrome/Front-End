@@ -752,8 +752,8 @@ mixin _$ChatReply {
   String? get reply => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_exit')
   bool? get isExit => throw _privateConstructorUsedError;
-  @JsonKey(name: 'decision_code')
-  String? get decisionCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'final_score')
+  int? get finalScore => throw _privateConstructorUsedError;
 
   /// Serializes this ChatReply to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -774,7 +774,7 @@ abstract class $ChatReplyCopyWith<$Res> {
       {@JsonKey(name: 'user_product_id') int userProductId,
       String? reply,
       @JsonKey(name: 'is_exit') bool? isExit,
-      @JsonKey(name: 'decision_code') String? decisionCode});
+      @JsonKey(name: 'final_score') int? finalScore});
 }
 
 /// @nodoc
@@ -795,7 +795,7 @@ class _$ChatReplyCopyWithImpl<$Res, $Val extends ChatReply>
     Object? userProductId = null,
     Object? reply = freezed,
     Object? isExit = freezed,
-    Object? decisionCode = freezed,
+    Object? finalScore = freezed,
   }) {
     return _then(_value.copyWith(
       userProductId: null == userProductId
@@ -810,10 +810,10 @@ class _$ChatReplyCopyWithImpl<$Res, $Val extends ChatReply>
           ? _value.isExit
           : isExit // ignore: cast_nullable_to_non_nullable
               as bool?,
-      decisionCode: freezed == decisionCode
-          ? _value.decisionCode
-          : decisionCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+      finalScore: freezed == finalScore
+          ? _value.finalScore
+          : finalScore // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -830,7 +830,7 @@ abstract class _$$ChatReplyImplCopyWith<$Res>
       {@JsonKey(name: 'user_product_id') int userProductId,
       String? reply,
       @JsonKey(name: 'is_exit') bool? isExit,
-      @JsonKey(name: 'decision_code') String? decisionCode});
+      @JsonKey(name: 'final_score') int? finalScore});
 }
 
 /// @nodoc
@@ -849,7 +849,7 @@ class __$$ChatReplyImplCopyWithImpl<$Res>
     Object? userProductId = null,
     Object? reply = freezed,
     Object? isExit = freezed,
-    Object? decisionCode = freezed,
+    Object? finalScore = freezed,
   }) {
     return _then(_$ChatReplyImpl(
       userProductId: null == userProductId
@@ -864,10 +864,10 @@ class __$$ChatReplyImplCopyWithImpl<$Res>
           ? _value.isExit
           : isExit // ignore: cast_nullable_to_non_nullable
               as bool?,
-      decisionCode: freezed == decisionCode
-          ? _value.decisionCode
-          : decisionCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+      finalScore: freezed == finalScore
+          ? _value.finalScore
+          : finalScore // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -879,7 +879,7 @@ class _$ChatReplyImpl implements _ChatReply {
       {@JsonKey(name: 'user_product_id') required this.userProductId,
       this.reply,
       @JsonKey(name: 'is_exit') this.isExit = false,
-      @JsonKey(name: 'decision_code') this.decisionCode});
+      @JsonKey(name: 'final_score') this.finalScore});
 
   factory _$ChatReplyImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChatReplyImplFromJson(json);
@@ -893,12 +893,12 @@ class _$ChatReplyImpl implements _ChatReply {
   @JsonKey(name: 'is_exit')
   final bool? isExit;
   @override
-  @JsonKey(name: 'decision_code')
-  final String? decisionCode;
+  @JsonKey(name: 'final_score')
+  final int? finalScore;
 
   @override
   String toString() {
-    return 'ChatReply(userProductId: $userProductId, reply: $reply, isExit: $isExit, decisionCode: $decisionCode)';
+    return 'ChatReply(userProductId: $userProductId, reply: $reply, isExit: $isExit, finalScore: $finalScore)';
   }
 
   @override
@@ -910,14 +910,14 @@ class _$ChatReplyImpl implements _ChatReply {
                 other.userProductId == userProductId) &&
             (identical(other.reply, reply) || other.reply == reply) &&
             (identical(other.isExit, isExit) || other.isExit == isExit) &&
-            (identical(other.decisionCode, decisionCode) ||
-                other.decisionCode == decisionCode));
+            (identical(other.finalScore, finalScore) ||
+                other.finalScore == finalScore));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, userProductId, reply, isExit, decisionCode);
+      Object.hash(runtimeType, userProductId, reply, isExit, finalScore);
 
   /// Create a copy of ChatReply
   /// with the given fields replaced by the non-null parameter values.
@@ -937,11 +937,10 @@ class _$ChatReplyImpl implements _ChatReply {
 
 abstract class _ChatReply implements ChatReply {
   const factory _ChatReply(
-          {@JsonKey(name: 'user_product_id') required final int userProductId,
-          final String? reply,
-          @JsonKey(name: 'is_exit') final bool? isExit,
-          @JsonKey(name: 'decision_code') final String? decisionCode}) =
-      _$ChatReplyImpl;
+      {@JsonKey(name: 'user_product_id') required final int userProductId,
+      final String? reply,
+      @JsonKey(name: 'is_exit') final bool? isExit,
+      @JsonKey(name: 'final_score') final int? finalScore}) = _$ChatReplyImpl;
 
   factory _ChatReply.fromJson(Map<String, dynamic> json) =
       _$ChatReplyImpl.fromJson;
@@ -955,8 +954,8 @@ abstract class _ChatReply implements ChatReply {
   @JsonKey(name: 'is_exit')
   bool? get isExit;
   @override
-  @JsonKey(name: 'decision_code')
-  String? get decisionCode;
+  @JsonKey(name: 'final_score')
+  int? get finalScore;
 
   /// Create a copy of ChatReply
   /// with the given fields replaced by the non-null parameter values.

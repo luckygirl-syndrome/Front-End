@@ -49,7 +49,7 @@ class ChatReply with _$ChatReply {
     @JsonKey(name: 'user_product_id') required int userProductId,
     String? reply,
     @JsonKey(name: 'is_exit') @Default(false) bool? isExit,
-    @JsonKey(name: 'decision_code') String? decisionCode,
+    @JsonKey(name: 'final_score') int? finalScore,
   }) = _ChatReply;
 
   factory ChatReply.fromJson(Map<String, dynamic> json) =>

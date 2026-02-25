@@ -192,7 +192,7 @@ class HomeDecisionSection extends ConsumerWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        "결정!",
+        "결정했어!",
         textAlign: TextAlign.center,
         style: AppTextStyles.ptdBold(12).copyWith(
           color: AppColors.white,

@@ -18,9 +18,7 @@ class HomeRepository {
       debugPrint("📡 [HomeRepository] Requesting: GET /api/dashboard/home");
       final response = await _dio.get('/api/dashboard/home');
 
-      // ✅ 상태 코드 확인
-      debugPrint("📡 [HomeRepository] Status Code: ${response.statusCode}");
-
+      
       if (response.statusCode != 200) {
         debugPrint("⚠️  [HomeRepository] Non-200 Response: ${response.data}");
         throw Exception(
@@ -28,10 +26,8 @@ class HomeRepository {
         );
       }
 
-      debugPrint("📡 [HomeRepository] Full Response: ${response.data}");
-      debugPrint(
-        "📡 [HomeRepository] Response Type: ${response.data.runtimeType}",
-      );
+      
+      
 
       // 응답이 List인 경우
       if (response.data is List) {

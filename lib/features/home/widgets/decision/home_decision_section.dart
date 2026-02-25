@@ -96,7 +96,7 @@ class HomeDecisionSection extends ConsumerWidget {
             _buildHighlightItem(
               context,
               "가장 오래 고민 중인 옷 🤔",
-              formatConsideringDaysShort(longest.durationDays),
+              formatConsideringDays(longest.durationDays),
               longest,
             ),
           const Padding(

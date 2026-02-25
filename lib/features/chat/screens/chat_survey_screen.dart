@@ -119,6 +119,16 @@ class _ChatSurveyScreenState extends ConsumerState<ChatSurveyScreen>
       debugPrint('[DEBUG] finalizeSurvey success: ${reply != null}');
 
       if (reply != null && mounted) {
+        final qc = _answers['qc']! > 7 ? 7 : _answers['qc']!;
+        ref.read(lastSurveyAnswersProvider.notifier).setAnswers(
+              widget.userProductId,
+              SurveyAnswers(
+                q1: _answers['q1']!,
+                q2: _answers['q2']!,
+                q3: _answers['q3']!,
+                qc: qc,
+              ),
+            );
         final isErrorReply = ChatNotifier.isAnalysisErrorReply(reply.reply);
         if (isErrorReply) {
           // AI 첫 마디 대신 에러 문구가 왔으면, 준비될 때까지 로딩 유지 후 폴링

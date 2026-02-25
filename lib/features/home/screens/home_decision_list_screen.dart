@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
+import 'package:ttobaba/core/utils/format_utils.dart';
 import 'package:ttobaba/features/home/providers/home_lists_provider.dart';
 import 'package:ttobaba/features/home/widgets/decision/yet_decided_item.dart';
 
@@ -80,7 +81,7 @@ class DecisionListScreen extends ConsumerWidget {
                             'assets/images/products/product_sample.png',
                         title: item.productName,
                         price: "${formatter.format(item.price)}원",
-                        dateTag: '${item.durationDays ?? 0}일 고민',
+                        dateTag: formatConsideringDays(item.durationDays),
                         onTap: () =>
                             context.push('/chat/${item.userProductId}'),
                       );

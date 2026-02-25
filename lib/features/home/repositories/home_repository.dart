@@ -18,9 +18,7 @@ class HomeRepository {
       debugPrint("📡 [HomeRepository] Requesting: GET /api/dashboard/home");
       final response = await _dio.get('/api/dashboard/home');
 
-      // ✅ 상태 코드 확인
-      debugPrint("📡 [HomeRepository] Status Code: ${response.statusCode}");
-
+      
       if (response.statusCode != 200) {
         debugPrint("⚠️  [HomeRepository] Non-200 Response: ${response.data}");
         throw Exception(
@@ -28,10 +26,8 @@ class HomeRepository {
         );
       }
 
-      debugPrint("📡 [HomeRepository] Full Response: ${response.data}");
-      debugPrint(
-        "📡 [HomeRepository] Response Type: ${response.data.runtimeType}",
-      );
+      
+      
 
       // 응답이 List인 경우
       if (response.data is List) {
@@ -58,21 +54,39 @@ class HomeRepository {
     }
   }
 
+  /// GET /api/dashboard/receipts — 안 산 영수증 목록 (구매 포기 status만)
+  /// Response: { "status": "string", "data": [ { user_product_id, product_id, product_name, product_img, price, discount_rate } ] }
   Future<List<Map<String, dynamic>>> getUnboughtReceiptsList() async {
     try {
       final response = await _dio.get('/api/dashboard/receipts');
-      // Response structure: { "status": "...", "data": [...] }
       final json = response.data as Map<String, dynamic>;
-      return List<Map<String, dynamic>>.from(json['data']);
+      final data = json['data'];
+      if (data is! List) return [];
+      return List<Map<String, dynamic>>.from(
+        data.map((e) => e as Map<String, dynamic>),
+      );
     } catch (e) {
       rethrow;
     }
   }
 
+  /// GET /api/dashboard/receipts/{user_product_id} — 안 산 영수증 상세 (구매 포기만)
+  /// Response: { "status": "string", "data": { user_product_id, mall_name, brand, product_name, product_img, price, discount_rate, saved_amount, completed_at, duration_days } }
+  /// 422: Validation Error
   Future<Map<String, dynamic>> getReceiptDetail(int userProductId) async {
     try {
-      final response = await _dio.get('/api/dashboard/receipts/$userProductId');
+      final response =
+          await _dio.get('/api/dashboard/receipts/$userProductId');
       return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        final detail = e.response?.data;
+        final msg = detail is Map && detail['detail'] != null
+            ? detail['detail'].toString()
+            : '해당 영수증을 찾을 수 없습니다.';
+        throw Exception(msg);
+      }
+      rethrow;
     } catch (e) {
       rethrow;
     }

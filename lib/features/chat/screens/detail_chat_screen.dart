@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
@@ -39,6 +38,34 @@ String _platformToBrand(String? platform) {
   }
 }
 
+/// "다시 시도" / 분석 중 재시도 시: 우선 finalize-survey를 호출해 세션 재준비.
+/// - 저장된 설문이 있으면 그 값을 사용, 없으면 기본값(1,1,1,1)
+/// - 반환: first_reply가 유효(에러 문구 아님)면 해당 텍스트, 아니면 null.
+///   유효 시 호출 쪽에서 타이머 중단 후 room 갱신. 텍스트가 있으면 오버레이 숨기고 채팅 시작 처리에 사용.
+Future<String?> _retryRoomWithFinalizeSurveyIfNeeded(
+    WidgetRef ref, int userProductId) async {
+  final stored = ref.read(lastSurveyAnswersProvider)[userProductId];
+  final SurveyAnswers effective =
+      stored ?? const SurveyAnswers(q1: 1, q2: 1, q3: 1, qc: 1);
+
+  try {
+    final reply = await ref.read(chatProvider.notifier).finalizeSurvey(
+          userProductId: userProductId,
+          q1: effective.q1,
+          q2: effective.q2,
+          q3: effective.q3,
+          qc: effective.qc,
+        );
+    final text = reply?.reply;
+    final valid = text != null &&
+        text.isNotEmpty &&
+        !ChatNotifier.isAnalysisErrorReply(text);
+    return valid ? text : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
     with SingleTickerProviderStateMixin {
   Timer? _analysisRetryTimer;
@@ -55,6 +82,8 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
   int _lastMessageCount = 0;
   bool _didInitialScrollToBottom = false;
   bool _chatEnded = false; // POST /api/chat/exit 호출 후 true
+  /// finalize-survey 재시도에서 유효한 first_reply를 받았을 때. 오버레이 숨기고 채팅 시작.
+  String? _pendingValidFirstReplyFromRetry;
 
   @override
   void initState() {
@@ -153,7 +182,8 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
   }
 
   Widget _buildChatBody(WidgetRef ref, ChatRoomDetailResponse detail) {
-    final displayMessages = _displayMessages(detail);
+    final displayMessages =
+        _displayMessages(detail, overrideFirstReply: _pendingValidFirstReplyFromRetry);
     final count = _itemCount(detail, displayMessages);
     if (count > _lastMessageCount) {
       _lastMessageCount = count;
@@ -188,8 +218,15 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
       });
     }
     final hasValidFirst = ChatNotifier.hasValidFirstMessage(detail);
+    if (hasValidFirst && _pendingValidFirstReplyFromRetry != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _pendingValidFirstReplyFromRetry = null);
+      });
+    }
     final showAnalysisOverlay = detail.messages.isNotEmpty &&
         !hasValidFirst &&
+        _pendingValidFirstReplyFromRetry == null &&
         _analysisRetryCount < _kMaxAnalysisRetries;
     if (showAnalysisOverlay) {
       _startAnalysisRetryTimer();
@@ -411,20 +448,26 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
     );
   }
 
-  /// 설문(8) 다음 첫 리플라이 구간에서 에러 메시지 중복 제거, 성공한 마지막 1개만 표시
-  List<ChatMessageResponse> _displayMessages(ChatRoomDetailResponse detail) {
+  /// 설문(8) 다음 첫 리플라이 구간에서 에러 메시지 중복 제거, 성공한 마지막 1개만 표시.
+  /// [overrideFirstReply]가 있으면 첫 리플라이 내용을 이 텍스트로 대체 (finalize-survey 재시도로 받은 유효 응답).
+  List<ChatMessageResponse> _displayMessages(
+    ChatRoomDetailResponse detail, {
+    String? overrideFirstReply,
+  }) {
     if (detail.messages.length <= 8) return detail.messages;
     const surveyCount = 8;
     final rest = detail.messages.sublist(surveyCount);
     if (rest.isEmpty) return detail.messages;
-    // 첫 리플라이 구간: 연속된 assistant 중 에러인 것들은 제거, 마지막 1개만 유지
     int i = 0;
     while (i < rest.length && rest[i].role == 'assistant') {
       i++;
     }
     if (i <= 1) return detail.messages;
     final firstReplyBlock = rest.sublist(0, i);
-    final lastOnly = firstReplyBlock.last;
+    ChatMessageResponse lastOnly = firstReplyBlock.last;
+    if (overrideFirstReply != null) {
+      lastOnly = lastOnly.copyWith(message: overrideFirstReply);
+    }
     final filtered =
         detail.messages.sublist(0, surveyCount) + [lastOnly] + rest.sublist(i);
     return filtered;
@@ -467,13 +510,13 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
           context,
           msg.message,
           isMine: msg.role == 'user',
-          time: msg.createdAt ?? "",
+          time: formatChatTime(msg.createdAt),
         ),
       );
     }
     if (_pendingUserMessage != null && index == baseCount) {
       final timeStr = _pendingUserMessageSentAt != null
-          ? DateFormat('HH:mm').format(_pendingUserMessageSentAt!)
+          ? formatChatTimeFromDateTime(_pendingUserMessageSentAt!)
           : '보냄';
       return Padding(
         padding: padding,
@@ -525,11 +568,20 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
   void _startAnalysisRetryTimer() {
     _analysisRetryTimer ??= Timer.periodic(
       const Duration(seconds: 5),
-      (_) {
+      (_) async {
         if (!mounted) return;
         _analysisRetryCount++;
         if (_analysisRetryCount >= _kMaxAnalysisRetries) {
           _stopAnalysisRetryTimer(resetCount: false);
+        }
+        final validReplyText =
+            await _retryRoomWithFinalizeSurveyIfNeeded(ref, widget.userProductId);
+        if (!mounted) return;
+        if (validReplyText != null) {
+          _stopAnalysisRetryTimer();
+          setState(() => _pendingValidFirstReplyFromRetry = validReplyText);
+          await Future.delayed(const Duration(milliseconds: 400));
+          if (!mounted) return;
         }
         ref.invalidate(chatRoomDetailProvider(widget.userProductId));
       },
@@ -575,8 +627,17 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
               ),
               const SizedBox(height: 24),
               TextButton(
-                onPressed: () {
-                  ref.invalidate(chatRoomDetailProvider(widget.userProductId));
+                onPressed: () async {
+                  final validReplyText =
+                      await _retryRoomWithFinalizeSurveyIfNeeded(
+                          ref, widget.userProductId);
+                  if (!mounted) return;
+                  if (validReplyText != null) {
+                    _stopAnalysisRetryTimer();
+                    setState(() => _pendingValidFirstReplyFromRetry = validReplyText);
+                  }
+                  ref.invalidate(
+                      chatRoomDetailProvider(widget.userProductId));
                 },
                 child: Text(
                   '다시 시도',
@@ -623,7 +684,9 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
             const SizedBox(height: 24),
             AppButton(
               text: '다시 시도',
-              onPressed: () {
+              onPressed: () async {
+                await _retryRoomWithFinalizeSurveyIfNeeded(ref, userProductId);
+                if (!context.mounted) return;
                 ref.invalidate(chatRoomDetailProvider(userProductId));
               },
               backgroundColor: AppColors.primaryMain,

@@ -23,7 +23,7 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
           if (items.isEmpty) {
             return const Center(
               child: Padding(
-                padding: EdgeInsets.all(40.0),
+                padding: EdgeInsets.all(32),
                 child: Text(
                   "아직 발행된 영수증이 없습니다.",
                   style: TextStyle(color: AppColors.white),
@@ -33,7 +33,8 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 32),
+            padding: const EdgeInsets.fromLTRB(
+                32, 32, 32, 32), // 사방 32, 맨 아래 영수증 아래도 32
             child: Column(
               children: [
                 _buildHeader(),
@@ -45,16 +46,16 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
         },
         loading: () => const Center(
           child: Padding(
-            padding: EdgeInsets.all(40.0),
+            padding: EdgeInsets.all(32),
             child: CircularProgressIndicator(color: AppColors.white),
           ),
         ),
         error: (e, __) => Center(
           child: Padding(
-            padding: const EdgeInsets.all(40.0),
+            padding: EdgeInsets.all(32),
             child: Text(
               "오류가 발생했습니다: $e",
-              style: const TextStyle(color: AppColors.white),
+              style: TextStyle(color: AppColors.white),
             ),
           ),
         ),
@@ -63,9 +64,7 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
+    return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
@@ -74,7 +73,6 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
           ),
           const Icon(Icons.tune, color: AppColors.white),
         ],
-      ),
     );
   }
 
@@ -96,18 +94,13 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
           offset: Offset(0, index == 0 ? 0 : -140.0 * index),
           child: Align(
             alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: isLeft ? 32 : 0,
-                right: isLeft ? 0 : 32,
-              ),
-              child: SimpleNoBuyReceipt(
+            child: SimpleNoBuyReceipt(
                 backgroundColor: color,
                 shadowColor: color,
                 title: item.productName,
                 price: formatPriceWithUnit(item.price, zeroLabel: '0원'),
                 discount: "${(item.discountRate ?? 0).toInt()}%",
-                imageUrl: "assets/images/products/product_sample.png",
+                imageUrl: item.productImg ?? 'assets/images/products/product_sample.png',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -120,8 +113,7 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
                 },
               ),
             ),
-          ),
-        );
+          );
       }),
     );
   }

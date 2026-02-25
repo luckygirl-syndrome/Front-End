@@ -3,6 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ttobaba/features/chat/models/chat_model.dart';
 import 'package:ttobaba/features/chat/repositories/chat_repository.dart';
 
+/// 설문 답변 (q1, q2, q3, qc). 채팅 "다시 시도" 시 finalize-survey 재호출용.
+class SurveyAnswers {
+  const SurveyAnswers({
+    required this.q1,
+    required this.q2,
+    required this.q3,
+    required this.qc,
+  });
+  final int q1;
+  final int q2;
+  final int q3;
+  final int qc;
+}
+
+class LastSurveyAnswersNotifier extends StateNotifier<Map<int, SurveyAnswers>> {
+  LastSurveyAnswersNotifier() : super({});
+
+  void setAnswers(int userProductId, SurveyAnswers answers) {
+    state = {...state, userProductId: answers};
+  }
+
+  SurveyAnswers? getAnswers(int userProductId) => state[userProductId];
+}
+
+final lastSurveyAnswersProvider =
+    StateNotifierProvider<LastSurveyAnswersNotifier, Map<int, SurveyAnswers>>(
+        (ref) => LastSurveyAnswersNotifier());
+
 // 1. 채팅 필터
 enum ChatFilter { all, decided, considering }
 

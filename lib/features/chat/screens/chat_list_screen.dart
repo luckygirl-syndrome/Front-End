@@ -128,7 +128,7 @@ class ChatListScreen extends ConsumerWidget {
             ChatItem(
               status: _statusFromLabel(latestChat.statusLabel),
               price: formatPriceWithUnit(latestChat.price, zeroLabel: '0원'),
-              date: "최근",
+              date: latestChat.lastChatTime,
               title: latestChat.productName,
               imageUrl:
                   latestChat.productImg ??

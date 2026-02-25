@@ -134,8 +134,10 @@ class DetailNoBuyReceiptCard extends StatelessWidget {
         color: AppColors.primaryMain,
         shape: BoxShape.circle,
       ),
-      child: Text(char,
-          style: AppTextStyles.ptdBold(16).copyWith(color: AppColors.black)),
+      child: Text(
+        char,
+        style: AppTextStyles.ptdBold(16).copyWith(color: AppColors.black),
+      ),
     );
   }
 

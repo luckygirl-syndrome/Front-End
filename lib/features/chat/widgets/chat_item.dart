@@ -39,18 +39,7 @@ class ChatItem extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                imageUrl,
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 64,
-                  height: 64,
-                  color: AppColors.lightGrey,
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
+              child: _buildProductImage(imageUrl),
             ),
 
             const SizedBox(width: 20), // 이미지와 텍스트 사이 간격
@@ -111,6 +100,34 @@ class ChatItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// URL이면 네트워크 이미지, 아니면 로컬 asset
+  Widget _buildProductImage(String imageUrl) {
+    final isNetwork = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+    const size = 64.0;
+    final errorWidget = Container(
+      width: size,
+      height: size,
+      color: AppColors.lightGrey,
+      child: const Icon(Icons.image_not_supported),
+    );
+    if (isNetwork) {
+      return Image.network(
+        imageUrl,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => errorWidget,
+      );
+    }
+    return Image.asset(
+      imageUrl,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => errorWidget,
     );
   }
 

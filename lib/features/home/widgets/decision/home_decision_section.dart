@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
+import 'package:ttobaba/core/utils/format_utils.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/features/home/models/dashboard_model.dart';
 import 'package:ttobaba/features/home/providers/home_lists_provider.dart';
@@ -77,8 +77,6 @@ class HomeDecisionSection extends ConsumerWidget {
 
   Widget _buildHighlightCard(
       ConsideringListItem? longest, ConsideringListItem? mostExpensive) {
-    final formatter = NumberFormat.decimalPattern();
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -107,7 +105,7 @@ class HomeDecisionSection extends ConsumerWidget {
           if (mostExpensive != null)
             _buildHighlightItem(
               "고민 중인 가장 비싼 옷 💰",
-              "${formatter.format(mostExpensive.price)}원",
+              formatPriceWithUnit(mostExpensive!.price),
               mostExpensive.productName,
               mostExpensive.productImg,
             ),
@@ -206,8 +204,6 @@ class HomeDecisionSection extends ConsumerWidget {
 
   Widget _buildListSection(
       BuildContext context, List<ConsideringListItem> items) {
-    final formatter = NumberFormat.decimalPattern();
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -220,7 +216,7 @@ class HomeDecisionSection extends ConsumerWidget {
                 imageUrl: item.productImg ??
                     'assets/images/products/product_sample.png',
                 title: item.productName,
-                price: "${formatter.format(item.price)}원",
+                price: formatPriceWithUnit(item.price, zeroLabel: '0원'),
                 dateTag: '${item.durationDays ?? 0}일 고민',
               )),
         ],

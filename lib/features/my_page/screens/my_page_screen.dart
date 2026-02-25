@@ -1,5 +1,6 @@
 // lib/features/my/view/my_page_screen.dart
 import 'package:flutter/material.dart';
+import 'package:ttobaba/core/utils/format_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -285,14 +286,6 @@ class MyPageScreen extends ConsumerWidget {
     );
   }
 
-  // 콤마 포맷팅 헬퍼
-  String _formatPrice(int price) {
-    return price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
-  }
-
   // 나의 옷장 섹션 상세 [cite: 2026-02-16]
   Widget _buildClosetSection(MyPageState state, WidgetRef ref) {
     final closetStatsAsync = ref.watch(closetStatsStateProvider);
@@ -315,7 +308,7 @@ class MyPageScreen extends ConsumerWidget {
                   child: ClosetStatCard(
                     title: '고심 끝에 구매한 옷',
                     count: boughtCount,
-                    price: '${_formatPrice(boughtPrice)}원',
+                    price: formatPriceWithUnit(boughtPrice, zeroLabel: '0원'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -323,7 +316,7 @@ class MyPageScreen extends ConsumerWidget {
                   child: ClosetStatCard(
                     title: '아쉽지만 포기한 옷',
                     count: droppedCount,
-                    price: '${_formatPrice(droppedPrice)}원',
+                    price: formatPriceWithUnit(droppedPrice, zeroLabel: '0원'),
                   ),
                 ),
               ],

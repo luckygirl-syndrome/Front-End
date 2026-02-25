@@ -16,8 +16,9 @@ class UnreviewedItemWidget extends StatelessWidget {
       children: [
         Text(
           "이 옷, 산 지 2주일이 넘었네요.\n만족하세요?",
-          style: AppTextStyles.ptdBold(20)
-              .copyWith(color: AppColors.black, height: 1.2),
+          style: AppTextStyles.ptdBold(
+            20,
+          ).copyWith(color: AppColors.black, height: 1.2),
         ),
         const SizedBox(height: 16),
         Container(
@@ -41,8 +42,8 @@ class UnreviewedItemWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   'assets/images/products/product_sample.png',
-                  width: 100,
-                  height: 100,
+                  width: 76,
+                  height: 76,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -62,11 +63,15 @@ class UnreviewedItemWidget extends StatelessWidget {
                         children: [
                           Text(
                             "지그재그",
-                            style: AppTextStyles.ptdBold(12)
-                                .copyWith(color: AppColors.black),
+                            style: AppTextStyles.ptdBold(
+                              12,
+                            ).copyWith(color: AppColors.black),
                           ),
-                          const Icon(Icons.close,
-                              size: 16, color: AppColors.black),
+                          const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.black,
+                          ),
                         ],
                       ),
 
@@ -80,10 +85,7 @@ class UnreviewedItemWidget extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            "29,950원",
-                            style: AppTextStyles.ptdBold(16),
-                          ),
+                          Text("29,950원", style: AppTextStyles.ptdBold(16)),
                         ],
                       ),
 
@@ -94,8 +96,9 @@ class UnreviewedItemWidget extends StatelessWidget {
                         children: [
                           Text(
                             "구매한 지 18일 지남",
-                            style: AppTextStyles.ptdRegular(12)
-                                .copyWith(color: AppColors.black),
+                            style: AppTextStyles.ptdRegular(
+                              12,
+                            ).copyWith(color: AppColors.black),
                           ),
 
                           // 👈 1. 기존 Container를 AppButton으로 교체합니다. [cite: 2026-02-17]
@@ -104,7 +107,9 @@ class UnreviewedItemWidget extends StatelessWidget {
                             // 👈 2. 작은 버튼 형태를 위해 width를 64px로 고정합니다. [cite: 2026-02-13]
                             width: 60,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 4),
+                              horizontal: 4,
+                              vertical: 4,
+                            ),
                             borderRadius: 4,
                             textStyle: AppTextStyles.ptdMedium(12),
                             onPressed: () {

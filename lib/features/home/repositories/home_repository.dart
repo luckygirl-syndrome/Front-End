@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ttobaba/core/network/dio_provider.dart';
@@ -24,17 +24,20 @@ class HomeRepository {
       if (response.statusCode != 200) {
         debugPrint("⚠️  [HomeRepository] Non-200 Response: ${response.data}");
         throw Exception(
-            "Dashboard API Error: ${response.data['detail'] ?? 'Unknown error'}");
+          "Dashboard API Error: ${response.data['detail'] ?? 'Unknown error'}",
+        );
       }
 
       debugPrint("📡 [HomeRepository] Full Response: ${response.data}");
       debugPrint(
-          "📡 [HomeRepository] Response Type: ${response.data.runtimeType}");
+        "📡 [HomeRepository] Response Type: ${response.data.runtimeType}",
+      );
 
       // 응답이 List인 경우
       if (response.data is List) {
         debugPrint(
-            "⚠️  Response is a List, not Map. First item: ${(response.data as List).isNotEmpty ? (response.data as List)[0] : 'empty'}");
+          "⚠️  Response is a List, not Map. First item: ${(response.data as List).isNotEmpty ? (response.data as List)[0] : 'empty'}",
+        );
       }
 
       return response.data as Map<String, dynamic>;

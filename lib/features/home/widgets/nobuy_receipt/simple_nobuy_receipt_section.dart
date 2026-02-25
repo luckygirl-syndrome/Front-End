@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
+import 'package:ttobaba/core/utils/format_utils.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
 import 'package:ttobaba/features/home/models/dashboard_model.dart';
 import 'package:ttobaba/features/home/providers/home_lists_provider.dart';
@@ -80,7 +80,6 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
 
   Widget _buildOverlappingList(
       BuildContext context, List<ReceiptListItem> items) {
-    final formatter = NumberFormat.decimalPattern();
     final List<Color> colors = [
       AppColors.secondaryMain,
       AppColors.primaryMain,
@@ -106,10 +105,9 @@ class SimpleNobuyReceiptSection extends ConsumerWidget {
                 backgroundColor: color,
                 shadowColor: color,
                 title: item.productName,
-                price: "${formatter.format(item.price)}원",
+                price: formatPriceWithUnit(item.price, zeroLabel: '0원'),
                 discount: "${(item.discountRate ?? 0).toInt()}%",
-                imageUrl: item.productImg ??
-                    'assets/images/products/product_sample.png',
+                imageUrl: "assets/images/products/product_sample.png",
                 onTap: () {
                   Navigator.push(
                     context,

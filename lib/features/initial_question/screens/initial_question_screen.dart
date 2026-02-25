@@ -23,6 +23,7 @@ class InitialQuestionScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBackBar(
+        title: '기본 질문',
         currentPage: state.currentIndex,
         onBackPressed: () => notifier.handleBack(
           onExit: () => context.pop(), // 첫 페이지면 뒤로가기
@@ -30,18 +31,16 @@ class InitialQuestionScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.fromLTRB(32, 60, 32, 16),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-
               // 질문 타이틀 영역
               _QuestionHeader(
                 index: state.currentIndex,
                 title: state.currentTitle,
               ),
 
-              const Spacer(),
+              const SizedBox(height: 20),
 
               // 💡 핵심: 현재 타입에 맞는 입력 폼 (분리됨)
               // 💡 핵심: 현재 타입에 맞는 입력 폼 (분리됨)
@@ -59,13 +58,12 @@ class InitialQuestionScreen extends ConsumerWidget {
                 ),
               ),
 
-              // 'choice' 타입일 때만 하단 스페이서 유지 (중앙 정렬)
-              // 'input' 타입일 때는 스페이서 제거 -> 하단 정렬 (BottomButtons 위로)
-              if (state.currentType == 'choice') const Spacer(),
+              const Spacer(),
 
               // --- [분리된 위젯 호출] 하단 버튼 영역 ---
               BottomButtons(
                 type: state.currentType,
+                isLastPage: state.isLastPage,
                 onNext: () => notifier.handleNext(
                   onAllFinished: () {
                     if (from == 'my') {
@@ -79,11 +77,10 @@ class InitialQuestionScreen extends ConsumerWidget {
                 onAlternative: () => notifier.nextPage(),
               ),
 
-              const SizedBox(height: 33),
+              const SizedBox(height: 16),
               AppIndicator(
                   currentPage: state.currentIndex,
                   totalPage: state.questions.length),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -100,10 +97,16 @@ class _QuestionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Q4(index 3)일 때는 Bold/16, 나머지는 Bold/20
+    final isLastQuestion = index == 3;
+    final textStyle = isLastQuestion 
+        ? AppTextStyles.ptdBold(16)
+        : AppTextStyles.ptdBold(20);
+    
     return Text(
       'Q${index + 1}\n\n$title',
       textAlign: TextAlign.center,
-      style: AppTextStyles.ptdBold(24),
+      style: textStyle,
     );
   }
 }

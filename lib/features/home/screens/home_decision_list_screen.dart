@@ -27,8 +27,10 @@ class DecisionListScreen extends ConsumerWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios,
-                        color: AppColors.black),
+                    child: const Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.black,
+                    ),
                   ),
                 ],
               ),
@@ -44,8 +46,9 @@ class DecisionListScreen extends ConsumerWidget {
                 children: [
                   Text(
                     "전체 리스트",
-                    style: AppTextStyles.ptdBold(28)
-                        .copyWith(color: AppColors.black),
+                    style: AppTextStyles.ptdBold(
+                      28,
+                    ).copyWith(color: AppColors.black),
                   ),
                   const Icon(Icons.tune, color: AppColors.black),
                 ],

@@ -1,59 +1,650 @@
+import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ttobaba/core/theme/app_colors.dart';
 import 'package:ttobaba/core/theme/app_text_styles.dart';
+import 'package:ttobaba/core/utils/format_utils.dart';
 import 'package:ttobaba/core/widgets/app_button.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../providers/chat_provider.dart';
+import '../models/chat_model.dart';
 
-class DetailChatScreen extends ConsumerWidget {
-  const DetailChatScreen({super.key});
+class DetailChatScreen extends ConsumerStatefulWidget {
+  final int userProductId;
+  const DetailChatScreen({super.key, required this.userProductId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(context),
-            _buildProductHeader(), // 고정 영역 (흰색 배경)
-            _buildActionButtons(), // 고정 영역 (흰색 배경)
+  ConsumerState<DetailChatScreen> createState() => _DetailChatScreenState();
+}
 
-            // 👈 채팅 영역: 배경은 고정되고 메시지만 스크롤됨 [cite: 2026-02-16]
-            Expanded(
-              child: Stack(
-                children: [
-                  // 1. 고정 배경 그라데이션
-                  Positioned.fill(
+/// "분석 중" 오버레이에서 /room 재요청 최대 횟수 (이 횟수 넘기면 오버레이 해제, 폴링 중단)
+const int _kMaxAnalysisRetries = 12; // 12 * 5초 = 1분
+
+/// API의 platform 값(musinsa, zigzag, ably) → 화면 표시용 브랜드명
+String _platformToBrand(String? platform) {
+  if (platform == null || platform.isEmpty) return '분석 중';
+  switch (platform.toLowerCase()) {
+    case 'musinsa':
+      return '무신사';
+    case 'zigzag':
+      return '지그재그';
+    case 'ably':
+      return '에이블리';
+    default:
+      return platform;
+  }
+}
+
+class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
+    with SingleTickerProviderStateMixin {
+  Timer? _analysisRetryTimer;
+  int _analysisRetryCount = 0;
+  late final AnimationController _spinnerController;
+  final TextEditingController _inputController = TextEditingController();
+  // 낙관적 UI: 보낸 메시지 즉시 표시, AI 응답 대기 중엔 쩜쩜쩜
+  String? _pendingUserMessage;
+  DateTime? _pendingUserMessageSentAt; // 전송 시각 (시간 표시용)
+  bool _isLoadingReply = false;
+  String? _pendingReply;
+  bool _pendingCleared = false;
+  final ScrollController _scrollController = ScrollController();
+  int _lastMessageCount = 0;
+  bool _didInitialScrollToBottom = false;
+  bool _chatEnded = false; // POST /api/chat/exit 호출 후 true
+
+  @override
+  void initState() {
+    super.initState();
+    _spinnerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _analysisRetryTimer?.cancel();
+    _spinnerController.dispose();
+    _inputController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detailAsync = ref.watch(chatRoomDetailProvider(widget.userProductId));
+    // 갱신 중에도 이전 데이터가 있으면 그대로 표시 (채팅/입력창 유지, 아래에만 로딩 표시)
+    final detail = detailAsync.valueOrNull;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: detailAsync.when(
+        data: (d) => _buildChatBody(ref, d),
+        loading: () {
+          if (detail != null) {
+            return Stack(
+              children: [
+                _buildChatBody(ref, detail),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SafeArea(
                     child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [AppColors.white, AppColors.primaryMain],
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      color: Colors.black26,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       ),
                     ),
                   ),
+                ),
+              ],
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+        error: (err, stack) => _buildErrorState(
+          context,
+          ref,
+          widget.userProductId,
+          err,
+        ),
+      ),
+      ),
+    );
+  }
 
-                  // 2. 스크롤되는 채팅 내용
-                  ListView(
-                    padding: EdgeInsets.zero, // 기본 패딩 제거 [cite: 2026-02-11]
-                    children: [
-                      _buildChatContent(context),
-                    ],
-                  ),
+  /// exit 버튼(FINISHED), 구매 완료(PURCHASED), 구매 포기(ABANDONED) 모두 '채팅 종료'로 간주
+  static bool _isChatEndedStatus(String? status) {
+    if (status == null || status.isEmpty) return false;
+    return status == 'FINISHED' || status == 'PURCHASED' || status == 'ABANDONED';
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      final target = position.maxScrollExtent;
+      // 새 메시지가 맨 아래 보이도록 스르륵 이동 (용수철처럼 튀지 않도록)
+      position.animateTo(
+        target,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  Widget _buildChatBody(WidgetRef ref, ChatRoomDetailResponse detail) {
+    final displayMessages = _displayMessages(detail);
+    final count = _itemCount(detail, displayMessages);
+    if (count > _lastMessageCount) {
+      _lastMessageCount = count;
+      _scrollToBottom();
+    }
+    // 채팅방 첫 진입 시 리스트 로드 후 맨 아래로 스크롤
+    if (!_didInitialScrollToBottom && detail.messages.isNotEmpty) {
+      _didInitialScrollToBottom = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (!mounted) return;
+          _scrollToBottom();
+        });
+      });
+    }
+
+    // 서버에 방금 보낸 메시지+답변이 반영되면 pending 제거 (중복 방지)
+    if (_pendingReply != null &&
+        detail.messages.length >= 2 &&
+        detail.messages.last.role == 'assistant' &&
+        detail.messages.last.message == _pendingReply &&
+        !_pendingCleared) {
+      _pendingCleared = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _pendingUserMessage = null;
+          _pendingUserMessageSentAt = null;
+          _pendingReply = null;
+          _pendingCleared = false;
+        });
+      });
+    }
+    final hasValidFirst = ChatNotifier.hasValidFirstMessage(detail);
+    final showAnalysisOverlay = detail.messages.isNotEmpty &&
+        !hasValidFirst &&
+        _analysisRetryCount < _kMaxAnalysisRetries;
+    if (showAnalysisOverlay) {
+      _startAnalysisRetryTimer();
+    } else {
+      _stopAnalysisRetryTimer();
+    }
+    // 이미 종료된 채팅방(exit / 구매 완료 / 구매 포기)을 다시 열었을 때 배너 표시
+    final isEndedByStatus = _isChatEndedStatus(detail.status);
+    if (isEndedByStatus && !_chatEnded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _chatEnded = true);
+      });
+    }
+    final topPadding = MediaQuery.of(context).padding.top;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.white,
+                  AppColors.primaryMain,
                 ],
               ),
             ),
-            _buildInputArea(),
+          ),
+        ),
+        // iOS 등에서 statusBarColor가 무시될 때 상단 상태바 영역을 흰색으로 채움
+        if (topPadding > 0)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: topPadding,
+            child: Container(color: AppColors.white),
+          ),
+        SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _buildTopBar(context, detail),
+              _buildProductHeader(detail),
+              _buildActionButtons(context, ref, detail),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Builder(
+                      builder: (context) {
+                        final displayMessages = _displayMessages(detail);
+                        return ListView.builder(
+                          controller: _scrollController,
+                          physics: const ClampingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          itemCount: _itemCount(detail, displayMessages),
+                          itemBuilder: (context, index) {
+                            return _buildChatListItem(
+                                context, detail, index, displayMessages);
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              if (_chatEnded) _buildChatEndedBanner(),
+              _buildInputArea(ref),
+            ],
+          ),
+        ),
+        if (showAnalysisOverlay) _buildAnalysisLoadingOverlay(ref),
+      ],
+    );
+  }
+
+  /// POST /api/chat/exit 호출 후 입력창 위에 표시되는 종료 배너
+  Widget _buildChatEndedBanner() {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        decoration: const BoxDecoration(
+          color: AppColors.black,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+        ),
+        child: Text(
+          '채팅이 종료되었어요!',
+          style: AppTextStyles.ptdBold(20).copyWith(color: AppColors.white),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  // 4. 하단 입력창 + 시스템바(맨 아래)까지 AppColors.white 배경.
+  Widget _buildInputArea(WidgetRef ref) {
+    return Container(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                children: [
+                Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.paleGrey,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _inputController,
+                  style: AppTextStyles.ptdMedium(16),
+                  decoration: InputDecoration(
+                    hintText: "메시지 쓰기..",
+                    border: InputBorder.none,
+                    hintStyle: AppTextStyles.ptdMedium(
+                      12,
+                    ).copyWith(color: AppColors.grey),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            GestureDetector(
+              onTap: () async {
+                if (_isLoadingReply) return; // AI 응답 대기 중에는 전송 불가
+                final text = _inputController.text.trim();
+                if (text.isEmpty) return;
+
+                _inputController.clear();
+                setState(() {
+                  _pendingUserMessage = text;
+                  _pendingUserMessageSentAt = DateTime.now();
+                  _isLoadingReply = true;
+                  _pendingReply = null;
+                });
+                _scrollToBottom(); // 내 메시지 올라갈 때 스크롤
+                final reply = await ref
+                    .read(chatProvider.notifier)
+                    .sendMessage(widget.userProductId, text);
+
+                if (!mounted) return;
+                setState(() {
+                  _isLoadingReply = false;
+                  _pendingReply = reply?.reply;
+                });
+                _scrollToBottom(); // AI 답 올라갈 때 스크롤
+                if (reply == null) {
+                  setState(() {
+                    _pendingUserMessage = null;
+                    _pendingUserMessageSentAt = null;
+                    _pendingReply = null;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("메시지 전송에 실패했습니다.")),
+                  );
+                } else {
+                  ref.refresh(chatRoomDetailProvider(widget.userProductId));
+                  // LLM이 종료 메시지를 반환했으면 exit API 호출 → 방 상태 FINISHED, 목록 갱신
+                  if (reply.isExit == true) {
+                    debugPrint('🏁 [Chat] LLM 종료 응답 수신 → POST /api/chat/exit 호출');
+                    await ref.read(chatProvider.notifier).exitChat(widget.userProductId);
+                    if (mounted) {
+                      setState(() => _chatEnded = true);
+                      ref.refresh(chatRoomDetailProvider(widget.userProductId));
+                    }
+                  }
+                }
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _isLoadingReply
+                      ? AppColors.darkerGrey
+                      : AppColors.primaryMain,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.send_rounded,
+                  color: AppColors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+            ],
+          ),
+        ),
+        ),
+          // 맨 아래 상태바(홈 인디케이터) 영역까지 흰색 배경
+          Builder(
+            builder: (context) => Container(
+              height: MediaQuery.of(context).padding.bottom,
+              color: AppColors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 설문(8) 다음 첫 리플라이 구간에서 에러 메시지 중복 제거, 성공한 마지막 1개만 표시
+  List<ChatMessageResponse> _displayMessages(ChatRoomDetailResponse detail) {
+    if (detail.messages.length <= 8) return detail.messages;
+    const surveyCount = 8;
+    final rest = detail.messages.sublist(surveyCount);
+    if (rest.isEmpty) return detail.messages;
+    // 첫 리플라이 구간: 연속된 assistant 중 에러인 것들은 제거, 마지막 1개만 유지
+    int i = 0;
+    while (i < rest.length && rest[i].role == 'assistant') {
+      i++;
+    }
+    if (i <= 1) return detail.messages;
+    final firstReplyBlock = rest.sublist(0, i);
+    final lastOnly = firstReplyBlock.last;
+    final filtered = detail.messages.sublist(0, surveyCount) + [lastOnly] + rest.sublist(i);
+    return filtered;
+  }
+
+  int _itemCount(ChatRoomDetailResponse detail, List<ChatMessageResponse> displayMessages) {
+    int base = displayMessages.isEmpty ? 1 : displayMessages.length;
+    if (_pendingUserMessage != null) {
+      base += 1;
+      if (_isLoadingReply || _pendingReply != null) base += 1;
+    }
+    return base;
+  }
+
+  Widget _buildChatListItem(
+    BuildContext context,
+    ChatRoomDetailResponse detail,
+    int index,
+    List<ChatMessageResponse> displayMessages,
+  ) {
+    const padding = EdgeInsets.symmetric(horizontal: 24, vertical: 8);
+    final baseCount = displayMessages.isEmpty ? 1 : displayMessages.length;
+    if (displayMessages.isEmpty && index == 0) {
+      return Padding(
+        padding: padding,
+        child: _buildChatBubble(
+          context,
+          "상품 정보를 열심히 분석하고 있어요!\n잠시만 기다려 주시면 상품 정보와 함께 분석 내용을 알려드릴게요.",
+          isMine: false,
+          time: "시스템",
+        ),
+      );
+    }
+    if (index < baseCount) {
+      final msg = displayMessages[index];
+      return Padding(
+        padding: padding,
+        child: _buildChatBubble(
+          context,
+          msg.message,
+          isMine: msg.role == 'user',
+          time: msg.createdAt ?? "",
+        ),
+      );
+    }
+    if (_pendingUserMessage != null && index == baseCount) {
+      final timeStr = _pendingUserMessageSentAt != null
+          ? DateFormat('HH:mm').format(_pendingUserMessageSentAt!)
+          : '보냄';
+      return Padding(
+        padding: padding,
+        child: _buildChatBubble(
+          context,
+          _pendingUserMessage!,
+          isMine: true,
+          time: timeStr,
+        ),
+      );
+    }
+    // index == baseCount + 1: AI 대기 중(쩜쩜쩜) 또는 받은 답
+    if (_isLoadingReply) {
+      return Padding(
+        padding: padding,
+        child: _buildTypingIndicator(context),
+      );
+    }
+    if (_pendingReply != null) {
+      return Padding(
+        padding: padding,
+        child: _buildChatBubble(
+          context,
+          _pendingReply!,
+          isMine: false,
+          time: "",
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildTypingIndicator(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.paleGrey,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: _TypingDots(),
+        ),
+      ],
+    );
+  }
+
+  void _startAnalysisRetryTimer() {
+    _analysisRetryTimer ??= Timer.periodic(
+      const Duration(seconds: 5),
+      (_) {
+        if (!mounted) return;
+        _analysisRetryCount++;
+        if (_analysisRetryCount >= _kMaxAnalysisRetries) {
+          _stopAnalysisRetryTimer(resetCount: false);
+        }
+        ref.invalidate(chatRoomDetailProvider(widget.userProductId));
+      },
+    );
+  }
+
+  void _stopAnalysisRetryTimer({bool resetCount = true}) {
+    _analysisRetryTimer?.cancel();
+    _analysisRetryTimer = null;
+    if (resetCount) _analysisRetryCount = 0;
+  }
+
+  Widget _buildAnalysisLoadingOverlay(WidgetRef ref) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black.withOpacity(0.4),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              RotationTransition(
+                turns: _spinnerController,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Image.asset(
+                    'assets/images/avatars/image 200.png',
+                    width: 140,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 36),
+              Text(
+                '또바가 열심히\n분석하고 있어요',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.ptdExtraBold(24).copyWith(
+                  color: AppColors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () {
+                  ref.invalidate(chatRoomDetailProvider(widget.userProductId));
+                },
+                child: Text(
+                  '다시 시도',
+                  style: AppTextStyles.ptdMedium(14).copyWith(
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(
+    BuildContext context,
+    WidgetRef ref,
+    int userProductId,
+    Object error,
+  ) {
+    final is404 = error.toString().contains('404');
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
+              size: 48,
+              color: AppColors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              is404
+                  ? '채팅방을 준비하고 있어요.\n잠시 후 다시 시도해 주세요.'
+                  : '오류가 발생했습니다.\n다시 시도해 주세요.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.ptdMedium(16).copyWith(
+                color: AppColors.black.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 24),
+            AppButton(
+              text: '다시 시도',
+              onPressed: () {
+                ref.invalidate(chatRoomDetailProvider(userProductId));
+              },
+              backgroundColor: AppColors.primaryMain,
+              textColor: AppColors.white,
+              borderColor: AppColors.primaryMain,
+              textStyle: AppTextStyles.ptdBold(14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => context.pushReplacement('/chat_list'),
+              child: Text(
+                '채팅 목록으로',
+                style: AppTextStyles.ptdMedium(14).copyWith(
+                  color: AppColors.grey,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, ChatRoomDetailResponse detail) {
+    final String? productUrl = detail.productUrl;
+    final bool hasShopLink = productUrl != null &&
+        productUrl.isNotEmpty &&
+        (productUrl.startsWith('http://') || productUrl.startsWith('https://'));
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(32, 12, 32, 0),
@@ -63,9 +654,9 @@ class DetailChatScreen extends ConsumerWidget {
             .spaceBetween, // 👈 Arrangement.SpaceBetween 구현 [cite: 2026-02-16]
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 1. 왼쪽: 뒤로가기 버튼
+          // 1. 왼쪽: 뒤로가기 → 채팅 목록(네비바 채팅 탭)으로
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.go('/chat_list'),
             behavior: HitTestBehavior.opaque,
             child: const Icon(
               Icons.arrow_back_ios_new,
@@ -77,13 +668,22 @@ class DetailChatScreen extends ConsumerWidget {
           // 2. 중앙: 디자인상 빈 공간 (Auto)
           const Spacer(),
 
-          // 3. 오른쪽: 아이콘 그룹 (장바구니 + 더보기)
-          const Row(
+          // 3. 오른쪽: 아이콘 그룹 (shop → 해당 상품 쇼핑몰 페이지 / 더보기)
+          Row(
             children: [
-              Icon(Icons.shopping_bag_outlined,
-                  color: AppColors.black, size: 24),
-              SizedBox(width: 16), // 아이콘 사이 간격
-              Icon(Icons.more_horiz, color: AppColors.black, size: 24),
+              GestureDetector(
+                onTap: hasShopLink
+                    ? () => _openProductUrl(productUrl!)
+                    : null,
+                behavior: HitTestBehavior.opaque,
+                child: Icon(
+                  Icons.shopping_bag_outlined,
+                  color: hasShopLink ? AppColors.black : AppColors.grey,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Icon(Icons.more_horiz, color: AppColors.black, size: 24),
             ],
           ),
         ],
@@ -91,8 +691,32 @@ class DetailChatScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _openProductUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      // canLaunchUrl은 iOS 시뮬레이터 등에서 채널 오류를 일으킬 수 있어, 바로 launchUrl 시도
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('링크를 열 수 없어요.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('링크 열기 실패: $e')),
+        );
+      }
+    }
+  }
+
   // 1. 상단 상품 정보 레이아웃
-  Widget _buildProductHeader() {
+  Widget _buildProductHeader(ChatRoomDetailResponse detail) {
+    final String productName =
+        (detail.productName.isEmpty || detail.productName == "null")
+        ? "분석 중인 상품입니다..."
+        : detail.productName;
+
     return Container(
       // 디자인 가이드 수치: 좌32, 상32, 우32, 하20
       padding: const EdgeInsets.fromLTRB(32, 32, 32, 20),
@@ -100,67 +724,79 @@ class DetailChatScreen extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 왼쪽 상품 이미지 (80x80 고정) [cite: 2026-02-16]
+          // 1. 왼쪽 상품 이미지 (88x88, 오버플로우 방지) [cite: 2026-02-16]
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/product_sample.png',
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+            child: (detail.productImg != null && detail.productImg!.isNotEmpty)
+                ? Image.network(
+                    detail.productImg!,
+                    width: 88,
+                    height: 88,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 88,
+                      height: 88,
+                      color: AppColors.lightGrey,
+                      child: const Icon(
+                        Icons.downloading,
+                        color: AppColors.grey,
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: 88,
+                    height: 88,
+                    color: AppColors.paleGrey,
+                    child: const Icon(
+                      Icons.image_search,
+                      color: AppColors.grey,
+                      size: 40,
+                    ),
+                  ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 40),
 
-          // 2. 오른쪽 텍스트 영역 (이미지 높이 80에 맞춤)
+          // 2. 오른쪽 텍스트 영역 (이미지 높이와 동일, 88px로 여유 확보)
           Expanded(
             child: SizedBox(
-              height: 80, // 👈 이미지 높이와 동일하게 설정하여 상하 정렬 기준 마련 [cite: 2026-02-16]
+              height: 88,
               child: Column(
                 // 👈 상단과 하단을 양 끝으로 밀어 이미지 라인에 맞춤
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // [상단 그룹] 브랜드 + 상품명
+                  // [상단 그룹] 브랜드(플랫폼) + 상품명
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "에이블리",
-                        style: AppTextStyles.ptdBold(12)
-                            .copyWith(color: AppColors.black),
+                        _platformToBrand(detail.platform),
+                        style: AppTextStyles.ptdBold(
+                          12,
+                        ).copyWith(color: AppColors.black),
                       ),
                       Text(
-                        "❤️기모선택❤️찰랑 하이웨스트 와이드 롱팬츠",
-                        style: AppTextStyles.ptdRegular(12),
+                        productName,
+                        style: AppTextStyles.ptdRegular(14),
                         textAlign: TextAlign.right,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
                     ],
                   ),
 
-                  // [하단 그룹] 태그 + 가격
+                  // [하단 그룹] 태그 + 가격 (리스트와 동일: 구매완료=노란 테두리+노란 글씨, 구매포기=노란 배경+흰 글씨, 고민중=회색)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryMain,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "구매 포기",
-                          style: AppTextStyles.ptdMedium(12)
-                              .copyWith(color: AppColors.white),
-                        ),
+                      Flexible(
+                        child: _buildStatusTag(detail.statusLabel),
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        "22,200원",
+                        formatPriceWithUnit(detail.price),
                         style: AppTextStyles.ptdBold(20),
                       ),
                     ],
@@ -174,78 +810,168 @@ class DetailChatScreen extends ConsumerWidget {
     );
   }
 
-  // 2. 중앙 액션 버튼
-  Widget _buildActionButtons() {
+  Widget _buildStatusTag(String statusLabel) {
+    final String text = statusLabel.isEmpty ? "분석 중" : statusLabel;
+    final bool isAnalyzing = statusLabel.contains("분석") || statusLabel.isEmpty;
+    final bool isConsidering = statusLabel.contains("고민");
+    final bool isPurchased = statusLabel.contains("구매 완료");
+    final bool isGaveUp = statusLabel.contains("구매 포기");
+
+    Color bgColor;
+    Color textColor;
+    BoxBorder? border;
+
+    if (isAnalyzing) {
+      bgColor = AppColors.grey;
+      textColor = AppColors.white;
+      border = null;
+    } else if (isConsidering) {
+      bgColor = AppColors.white;
+      textColor = AppColors.lightGrey;
+      border = Border.all(color: AppColors.lightGrey);
+    } else if (isPurchased) {
+      bgColor = AppColors.white;
+      textColor = AppColors.primaryMain;
+      border = Border.all(color: AppColors.primaryMain);
+    } else {
+      assert(isGaveUp);
+      bgColor = AppColors.primaryMain;
+      textColor = AppColors.white;
+      border = null;
+    }
+
     return Container(
-      // 디자인 가이드: 좌우 32, 상하 20 반영
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: border,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.ptdMedium(12).copyWith(color: textColor),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(
+    BuildContext context,
+    WidgetRef ref,
+    ChatRoomDetailResponse data,
+  ) {
+    // statusLabel 기준: "고민 중" → 안 살래요/살래요, "구매 완료"/"구매 포기" → 내 평가 확인하기 + 저 사실...
+    final isConsidering = data.statusLabel.contains('고민');
+    final isPurchased = data.statusLabel.contains('구매 완료');
+    final isEvaluated = data.isEvaluated ?? false;
+
+    return Container(
       padding: const EdgeInsets.fromLTRB(32, 8, 32, 12),
       color: AppColors.white,
       child: Row(
         children: [
-          // 1. 내 평가 확인하기 버튼
-          Expanded(
-            child: AppButton(
-              text: "내 평가 확인하기",
-              onPressed: () {},
-              backgroundColor: AppColors.white,
-              textColor: AppColors.black,
-              borderColor: AppColors.black,
-              borderWidth: 1,
-              textStyle: AppTextStyles.ptdBold(12),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+          if (isConsidering) ...[
+            // 1. 고민 중: 안 살래요 / 살래요
+            Expanded(
+              child: AppButton(
+                text: "안 살래요",
+                onPressed: () =>
+                    _updateStatus(context, ref, false, "구매 포기 처리되었습니다."),
+                backgroundColor: AppColors.secondaryMain,
+                textColor: AppColors.white,
+                borderColor: AppColors.secondaryMain,
+                textStyle: AppTextStyles.ptdBold(14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
-          ),
-
-          // 2. 버튼 사이 간격 20px
-          const SizedBox(width: 20),
-
-          // 3. 저 사실... 샀어요 버튼
-          Expanded(
-            child: AppButton(
-              text: "저 사실... 샀어요",
-              onPressed: () {},
-              backgroundColor: AppColors.black,
-              textColor: AppColors.white,
-              borderColor: AppColors.black,
-              textStyle: AppTextStyles.ptdBold(12),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppButton(
+                text: "살래요",
+                onPressed: () =>
+                    _updateStatus(context, ref, true, "구매 결정! 축하드려요."),
+                backgroundColor: AppColors.primaryMain,
+                textColor: AppColors.white,
+                borderColor: AppColors.primaryMain,
+                textStyle: AppTextStyles.ptdBold(14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
-          ),
+          ] else ...[
+            // 2. 구매 완료 → 내 평가 확인하기 + "저 사실... 반품했어요" / 구매 포기 → + "저 사실... 샀어요"
+            Expanded(
+              child: AppButton(
+                text: isEvaluated ? "내 평가 확인하기" : "평가하기",
+                onPressed: () =>
+                    context.push(isEvaluated ? '/feedback/view' : '/feedback'),
+                backgroundColor: AppColors.white,
+                textColor: AppColors.black,
+                borderColor: AppColors.black,
+                borderWidth: 1,
+                textStyle: AppTextStyles.ptdBold(14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppButton(
+                text: isPurchased ? "저 사실... 반품했어요" : "저 사실... 샀어요",
+                onPressed: () {
+                  final newStatus = !isPurchased;
+                  final msg = isPurchased
+                      ? "반품(구매 포기) 처리되었습니다."
+                      : "구매 완료로 변경되었습니다.";
+                  _updateStatus(context, ref, newStatus, msg);
+                },
+                backgroundColor: AppColors.black,
+                textColor: AppColors.white,
+                borderColor: AppColors.black,
+                textStyle: AppTextStyles.ptdBold(14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  // 3. 채팅 말풍선 영역
-  // 1. context 인자 추가
-  Widget _buildChatContent(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24), // 가이드 24px 반영
-      child: Column(
-        children: [
-          // 2. 하위 함수에 context 전달
-          _buildChatBubble(context, "Look it's a new me...",
-              isMine: false, time: "오후 8:51"),
-          const SizedBox(height: 8), // 간격 16px
-          _buildChatBubble(context, "어쩌라고", isMine: true, time: "오후 8:51"),
-          const SizedBox(height: 8), // 간격 16px
-          _buildChatBubble(context, "Look it's a new me...",
-              isMine: false, time: "오후 8:51"),
-          const SizedBox(height: 8), // 간격 16px
-          _buildChatBubble(context, "어쩌라고", isMine: true, time: "오후 8:51"),
-        ],
-      ),
-    );
+  Future<void> _updateStatus(
+    BuildContext context,
+    WidgetRef ref,
+    bool isPurchased,
+    String message,
+  ) async {
+    final success = await ref
+        .read(chatProvider.notifier)
+        .updateChatStatus(widget.userProductId, isPurchased);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? message : "상태 변경에 실패했습니다."),
+          backgroundColor: success ? AppColors.black : Colors.red,
+        ),
+      );
+      if (success) {
+        ref.refresh(chatRoomDetailProvider(widget.userProductId));
+      }
+    }
   }
 
-  Widget _buildChatBubble(BuildContext context, String message,
-      {required bool isMine, required String time}) {
+  Widget _buildChatBubble(
+    BuildContext context,
+    String message, {
+    required bool isMine,
+    required String time,
+  }) {
     return Align(
       // 1. 내 메시지는 오른쪽, 상대 메시지는 왼쪽 정렬
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
-        crossAxisAlignment:
-            isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isMine
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Container(
             // 최대 너비를 화면의 70% 정도로 제한하여 가독성 확보
@@ -264,10 +990,7 @@ class DetailChatScreen extends ConsumerWidget {
                 bottomRight: Radius.circular(isMine ? 0 : 12),
               ),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 12,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 12),
               ],
             ),
             child: Text(
@@ -285,48 +1008,55 @@ class DetailChatScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  // 4. 하단 입력창
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: AppColors.white,
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 48,
-                decoration: BoxDecoration(
-                    color: AppColors.paleGrey,
-                    borderRadius: BorderRadius.circular(12)),
-                child: TextField(
-                  // 입력되는 텍스트 스타일 (필요시 추가)
-                  style: AppTextStyles.ptdMedium(16),
-                  decoration: InputDecoration(
-                    hintText: "메시지 쓰기..",
-                    border: InputBorder.none,
-                    // 👈 요청하신 스타일 반영: Medium/12, AppColors.grey
-                    hintStyle: AppTextStyles.ptdMedium(12).copyWith(
-                      color: AppColors.grey,
-                    ),
-                  ),
+/// AI 응답 대기 중 "쩜쩜쩜" 애니메이션
+class _TypingDots extends StatefulWidget {
+  @override
+  State<_TypingDots> createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<_TypingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final t = (_controller.value + i / 3) % 1.0;
+            final opacity = 0.3 + 0.7 * (0.5 - (t - 0.5).abs()).clamp(0.0, 1.0) * 2;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Text(
+                '·',
+                style: AppTextStyles.ptdMedium(20).copyWith(
+                  color: AppColors.black.withValues(alpha: opacity),
                 ),
               ),
-            ),
-            const SizedBox(width: 20),
-            Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                  color: AppColors.primaryMain, shape: BoxShape.circle),
-              child:
-                  const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-            ),
-          ],
-        ),
-      ),
+            );
+          }),
+        );
+      },
     );
   }
 }

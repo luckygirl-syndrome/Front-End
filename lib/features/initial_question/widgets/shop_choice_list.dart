@@ -26,7 +26,7 @@ class ShopChoiceList extends StatelessWidget {
             text: option,
             textColor: isSelected ? AppColors.white : AppColors.primaryMain,
             backgroundColor:
-                isSelected ? AppColors.primaryMain : Colors.transparent,
+                isSelected ? AppColors.primaryMain : AppColors.white,
             borderColor: AppColors.primaryMain,
             borderRadius: 12,
             borderWidth: 1,

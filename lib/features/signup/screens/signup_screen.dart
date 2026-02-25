@@ -54,7 +54,7 @@ class SignupScreen extends ConsumerWidget {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => TermsAgreementSheet(),
+                    builder: (context) => const TermsAgreementSheet(),
                   ).then((result) async {
                     if (result == true && context.mounted) {
                       // Navigate to SBTI start using go() which replaces the current stack.

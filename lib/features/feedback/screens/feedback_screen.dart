@@ -48,17 +48,18 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         child: Column(
           children: [
             const Divider(
-                height: 0.5, thickness: 0.5, color: AppColors.lightGrey),
+              height: 0.5,
+              thickness: 0.5,
+              color: AppColors.lightGrey,
+            ),
             _buildProductSummary(),
             const Divider(
-                height: 0.5, thickness: 0.5, color: AppColors.lightGrey),
-            Expanded(
-              child: _buildMainQuestionArea(),
+              height: 0.5,
+              thickness: 0.5,
+              color: AppColors.lightGrey,
             ),
-            AppIndicator(
-              currentPage: currentIndex,
-              totalPage: totalPages,
-            ),
+            Expanded(child: _buildMainQuestionArea()),
+            AppIndicator(currentPage: currentIndex, totalPage: totalPages),
           ],
         ),
       ),
@@ -74,8 +75,12 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/images/products/product_sample.png',
-                width: 100, height: 100, fit: BoxFit.cover),
+            child: Image.asset(
+              'assets/images/products/product_sample.png',
+              width: 104,
+              height: 104,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: 24),
           Expanded(
@@ -88,27 +93,39 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text("에이블리",
-                          style: AppTextStyles.ptdBold(12)
-                              .copyWith(color: AppColors.black)),
-                      Text("❤️기모선택❤️찰랑 하이웨스트 와이드 롱팬츠",
-                          style: AppTextStyles.ptdRegular(12)
-                              .copyWith(color: AppColors.black),
-                          textAlign: TextAlign.right,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        "에이블리",
+                        style: AppTextStyles.ptdBold(
+                          12,
+                        ).copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        "❤️기모선택❤️찰랑 하이웨스트 와이드 롱팬츠",
+                        style: AppTextStyles.ptdRegular(
+                          12,
+                        ).copyWith(color: AppColors.black),
+                        textAlign: TextAlign.right,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text("구매한 지 18일 지남",
-                          style: AppTextStyles.ptdRegular(12)
-                              .copyWith(color: AppColors.grey)),
+                      Text(
+                        "구매한 지 18일 지남",
+                        style: AppTextStyles.ptdRegular(
+                          12,
+                        ).copyWith(color: AppColors.grey),
+                      ),
                       // const SizedBox(height: 4),
-                      Text("22,200원",
-                          style: AppTextStyles.ptdBold(24)
-                              .copyWith(color: AppColors.black)),
+                      Text(
+                        "22,200원",
+                        style: AppTextStyles.ptdBold(
+                          24,
+                        ).copyWith(color: AppColors.black),
+                      ),
                     ],
                   ),
                 ],
@@ -200,7 +217,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       // 2단계: 바로 이유 입력창 노출
       return _buildReasonArea();
     }
-
     // 반품 안 한 경우 (isReturned = false)
     else {
       // 2단계: 만족도 선택 버튼 리스트
@@ -234,9 +250,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       children: [
         // 👈 핑거 이모지: 입력 단계는 가이드에 따라 질문 아래 32px 여백을 둡니다.
         const SizedBox(height: 32),
-        const Expanded(
-          child: AppLongtextField(hintText: "이유를 입력해 주세요"),
-        ),
+        const Expanded(child: AppLongtextField(hintText: "이유를 입력해 주세요")),
         const SizedBox(height: 32),
         TwoButtons(
           leftText: "스킵할래요",
@@ -254,21 +268,25 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
     final List<FeedbackButtonData> satisfactionItems = [
       FeedbackButtonData(
-          text: "너무너무 별로예요..",
-          color: AppColors.secondaryMain,
-          onTap: () => notifier.nextStep()),
+        text: "너무너무 별로예요..",
+        color: AppColors.secondaryMain,
+        onTap: () => notifier.nextStep(),
+      ),
       FeedbackButtonData(
-          text: "조금 별로예요",
-          color: AppColors.secondaryLight,
-          onTap: () => notifier.nextStep()),
+        text: "조금 별로예요",
+        color: AppColors.secondaryLight,
+        onTap: () => notifier.nextStep(),
+      ),
       FeedbackButtonData(
-          text: "이 정도면 괜찮죠",
-          color: AppColors.primaryLight,
-          onTap: () => notifier.nextStep()),
+        text: "이 정도면 괜찮죠",
+        color: AppColors.primaryLight,
+        onTap: () => notifier.nextStep(),
+      ),
       FeedbackButtonData(
-          text: "최고예요!",
-          color: AppColors.primaryMain,
-          onTap: () => notifier.nextStep()),
+        text: "최고예요!",
+        color: AppColors.primaryMain,
+        onTap: () => notifier.nextStep(),
+      ),
     ];
 
     // Spacer가 위에서 밀어주므로 여기서는 버튼 리스트만 리턴합니다. [cite: 2026-02-17]

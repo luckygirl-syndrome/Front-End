@@ -18,7 +18,17 @@ class UserRepository {
   Future<UserProfile> getProfile() async {
     try {
       final response = await _dio.get('/api/profile');
-      return UserProfile.fromJson(response.data);
+      if (response.statusCode != null &&
+          (response.statusCode! < 200 || response.statusCode! >= 300)) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        );
+      }
+      final data = response.data;
+      if (data is! Map<String, dynamic>) throw Exception('Invalid profile response');
+      return UserProfile.fromJson(data);
     } catch (e) {
       rethrow;
     }

@@ -19,8 +19,8 @@ class SimpleNoBuyReceipt extends StatelessWidget {
     this.title = "여성 아이스제로 레이디 미들 다운자켓#2_LE", // 제품 이름 [cite: 2026-01-02]
     this.price = "251,100원", // 가격 [cite: 2026-01-02]
     this.discount = "37%", // 할인율 [cite: 2026-01-02]
-    this.imageUrl =
-        "assets/images/products/product_sample.png", // 사진 경로 [cite: 2026-01-02]
+    this.imageUrl = 'assets/images/products/product_sample.png',
+    // 사진 경로 [cite: 2026-01-02]
     this.backgroundColor = AppColors.primaryMain,
     this.shadowColor = AppColors.primaryMain,
     this.onTap,

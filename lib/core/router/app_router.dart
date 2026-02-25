@@ -18,6 +18,7 @@ import 'package:ttobaba/features/home/screens/home_screen.dart';
 import 'package:ttobaba/features/chat/screens/chat_list_screen.dart';
 import 'package:ttobaba/features/chat/screens/detail_chat_screen.dart';
 import 'package:ttobaba/features/feedback/screens/feedback_screen.dart';
+import 'package:ttobaba/features/chat/screens/chat_survey_screen.dart';
 
 /// A notifier that notifies GoRouter when the auth state changes.
 class RouterNotifier extends ChangeNotifier {
@@ -126,8 +127,19 @@ final appRouterStateProvider = Provider<GoRouter>((ref) {
       ),
       // 채팅 상세
       GoRoute(
-        path: '/detail_chat',
-        builder: (context, state) => const DetailChatScreen(),
+        path: '/chat/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return DetailChatScreen(userProductId: id);
+        },
+      ),
+      // 채팅 시작 설문 ( q1~qc )
+      GoRoute(
+        path: '/chat/survey/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return ChatSurveyScreen(userProductId: id);
+        },
       ),
       // 피드백
       GoRoute(

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ttobaba/core/auth/auth_provider.dart';
+import 'package:ttobaba/core/network/api_config.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -16,7 +17,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: "http://18.118.233.127:8001", // AWS 백엔드
+      baseUrl: apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       contentType: 'application/json',
@@ -41,9 +42,23 @@ final dioProvider = Provider<Dio>((ref) {
       debugPrint("🚀 [REQ] ${options.method} ${options.path}");
       return handler.next(options);
     },
-    onResponse: (response, handler) {
+    onResponse: (response, handler) async {
       debugPrint(
           "✅ [RES] ${response.statusCode} ${response.requestOptions.path}");
+
+      // 401이면 토큰 삭제 + 인증 상태 갱신 후 요청을 에러로 처리 → 로그인 리다이렉트 유도
+      if (response.statusCode == 401) {
+        final storage = ref.read(secureStorageProvider);
+        await storage.delete(key: 'access_token');
+        ref.read(authStateProvider.notifier).refresh();
+        return handler.reject(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            type: DioExceptionType.badResponse,
+          ),
+        );
+      }
       return handler.next(response);
     },
     onError: (DioException e, handler) async {

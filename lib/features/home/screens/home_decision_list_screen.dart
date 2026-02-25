@@ -22,8 +22,10 @@ class DecisionListScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios,
-                        color: AppColors.black),
+                    child: const Icon(
+                      Icons.arrow_back_ios,
+                      color: AppColors.black,
+                    ),
                   ),
                 ],
               ),
@@ -40,8 +42,9 @@ class DecisionListScreen extends StatelessWidget {
                 children: [
                   Text(
                     "전체 리스트",
-                    style: AppTextStyles.ptdBold(28)
-                        .copyWith(color: AppColors.black),
+                    style: AppTextStyles.ptdBold(
+                      28,
+                    ).copyWith(color: AppColors.black),
                   ),
                   const Icon(Icons.tune, color: AppColors.black),
                 ],
@@ -59,7 +62,7 @@ class DecisionListScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   return const YetDecidedItem(
-                    imageUrl: 'assets/images/products/product_sample.png',
+                    imageUrl: "assets/images/products/product_sample.png",
                     title: '[프리미엄/인생핏!/면100] 답답함 없는, 리나 라운드 긴팔 가을 겨울 티셔츠 세...',
                     price: '199,900원',
                     dateTag: '13일 고민',

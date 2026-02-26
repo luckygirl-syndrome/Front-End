@@ -1278,7 +1278,7 @@ class _$ChatRoomDetailResponseImpl implements _ChatRoomDetailResponse {
 
   @override
   String toString() {
-    return 'ChatRoomDetailResponse(userProductId: $userProductId, productName: $productName, productImg: $productImg, price: $price, platform: $platform, productUrl: $productUrl, statusLabel: $statusLabel, status: $status, isPurchased: $isPurchased, isEvaluated: $isEvaluated, messages: $messages)';
+    return 'ChatRoomDetailResponse(userProductId: $userProductId, productName: $productName, productImg: $productImg, price: $price, platform: $platform, productUrl: $productUrl, statusLabel: $statusLabel, status: $status, isPurchased: $isPurchased, isEvaluated: $isEvaluated, finalScore: $finalScore, messages: $messages)';
   }
 
   @override

@@ -992,6 +992,8 @@ mixin _$ChatRoomDetailResponse {
   int? get isPurchased => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_evaluated')
   bool? get isEvaluated => throw _privateConstructorUsedError;
+  @JsonKey(name: 'final_score')
+  int? get finalScore => throw _privateConstructorUsedError;
   List<ChatMessageResponse> get messages => throw _privateConstructorUsedError;
 
   /// Serializes this ChatRoomDetailResponse to a JSON map.
@@ -1021,6 +1023,7 @@ abstract class $ChatRoomDetailResponseCopyWith<$Res> {
       String? status,
       @JsonKey(name: 'is_purchased') int? isPurchased,
       @JsonKey(name: 'is_evaluated') bool? isEvaluated,
+      @JsonKey(name: 'final_score') int? finalScore,
       List<ChatMessageResponse> messages});
 }
 
@@ -1050,6 +1053,7 @@ class _$ChatRoomDetailResponseCopyWithImpl<$Res,
     Object? status = freezed,
     Object? isPurchased = freezed,
     Object? isEvaluated = freezed,
+    Object? finalScore = freezed,
     Object? messages = null,
   }) {
     return _then(_value.copyWith(
@@ -1093,6 +1097,10 @@ class _$ChatRoomDetailResponseCopyWithImpl<$Res,
           ? _value.isEvaluated
           : isEvaluated // ignore: cast_nullable_to_non_nullable
               as bool?,
+      finalScore: freezed == finalScore
+          ? _value.finalScore
+          : finalScore // ignore: cast_nullable_to_non_nullable
+              as int?,
       messages: null == messages
           ? _value.messages
           : messages // ignore: cast_nullable_to_non_nullable
@@ -1121,6 +1129,7 @@ abstract class _$$ChatRoomDetailResponseImplCopyWith<$Res>
       String? status,
       @JsonKey(name: 'is_purchased') int? isPurchased,
       @JsonKey(name: 'is_evaluated') bool? isEvaluated,
+      @JsonKey(name: 'final_score') int? finalScore,
       List<ChatMessageResponse> messages});
 }
 
@@ -1149,6 +1158,7 @@ class __$$ChatRoomDetailResponseImplCopyWithImpl<$Res>
     Object? status = freezed,
     Object? isPurchased = freezed,
     Object? isEvaluated = freezed,
+    Object? finalScore = freezed,
     Object? messages = null,
   }) {
     return _then(_$ChatRoomDetailResponseImpl(
@@ -1192,6 +1202,10 @@ class __$$ChatRoomDetailResponseImplCopyWithImpl<$Res>
           ? _value.isEvaluated
           : isEvaluated // ignore: cast_nullable_to_non_nullable
               as bool?,
+      finalScore: freezed == finalScore
+          ? _value.finalScore
+          : finalScore // ignore: cast_nullable_to_non_nullable
+              as int?,
       messages: null == messages
           ? _value._messages
           : messages // ignore: cast_nullable_to_non_nullable
@@ -1214,6 +1228,7 @@ class _$ChatRoomDetailResponseImpl implements _ChatRoomDetailResponse {
       this.status,
       @JsonKey(name: 'is_purchased') this.isPurchased,
       @JsonKey(name: 'is_evaluated') this.isEvaluated,
+      @JsonKey(name: 'final_score') this.finalScore,
       required final List<ChatMessageResponse> messages})
       : _messages = messages;
 
@@ -1250,6 +1265,9 @@ class _$ChatRoomDetailResponseImpl implements _ChatRoomDetailResponse {
   @override
   @JsonKey(name: 'is_evaluated')
   final bool? isEvaluated;
+  @override
+  @JsonKey(name: 'final_score')
+  final int? finalScore;
   final List<ChatMessageResponse> _messages;
   @override
   List<ChatMessageResponse> get messages {
@@ -1286,6 +1304,8 @@ class _$ChatRoomDetailResponseImpl implements _ChatRoomDetailResponse {
                 other.isPurchased == isPurchased) &&
             (identical(other.isEvaluated, isEvaluated) ||
                 other.isEvaluated == isEvaluated) &&
+            (identical(other.finalScore, finalScore) ||
+                other.finalScore == finalScore) &&
             const DeepCollectionEquality().equals(other._messages, _messages));
   }
 
@@ -1303,6 +1323,7 @@ class _$ChatRoomDetailResponseImpl implements _ChatRoomDetailResponse {
       status,
       isPurchased,
       isEvaluated,
+      finalScore,
       const DeepCollectionEquality().hash(_messages));
 
   /// Create a copy of ChatRoomDetailResponse
@@ -1334,6 +1355,7 @@ abstract class _ChatRoomDetailResponse implements ChatRoomDetailResponse {
           final String? status,
           @JsonKey(name: 'is_purchased') final int? isPurchased,
           @JsonKey(name: 'is_evaluated') final bool? isEvaluated,
+          @JsonKey(name: 'final_score') final int? finalScore,
           required final List<ChatMessageResponse> messages}) =
       _$ChatRoomDetailResponseImpl;
 
@@ -1368,6 +1390,9 @@ abstract class _ChatRoomDetailResponse implements ChatRoomDetailResponse {
   @override
   @JsonKey(name: 'is_evaluated')
   bool? get isEvaluated;
+  @override
+  @JsonKey(name: 'final_score')
+  int? get finalScore;
   @override
   List<ChatMessageResponse> get messages;
 

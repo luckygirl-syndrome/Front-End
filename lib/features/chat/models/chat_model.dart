@@ -69,6 +69,7 @@ class ChatRoomDetailResponse with _$ChatRoomDetailResponse {
     String? status, // ANALYZING, PENDING, FINISHED (exit 호출 시 FINISHED → 종료 배너)
     @JsonKey(name: 'is_purchased') int? isPurchased,
     @JsonKey(name: 'is_evaluated') bool? isEvaluated,
+    @JsonKey(name: 'final_score') int? finalScore,
     required List<ChatMessageResponse> messages,
   }) = _ChatRoomDetailResponse;
 

@@ -265,7 +265,14 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
     final isEndedByStatus = _isChatEndedStatus(detail.status);
     if (isEndedByStatus && !_chatEnded) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _chatEnded = true);
+        if (mounted) {
+          setState(() {
+            _chatEnded = true;
+            // 서버에 저장된 최종 점수가 있으면 배너에 다시 표시
+            _finalScore = detail.finalScore;
+            _displayScore = detail.finalScore;
+          });
+        }
       });
     }
     final topPadding = MediaQuery.of(context).padding.top;

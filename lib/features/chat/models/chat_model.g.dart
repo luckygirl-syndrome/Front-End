@@ -93,6 +93,7 @@ _$ChatRoomDetailResponseImpl _$$ChatRoomDetailResponseImplFromJson(
       status: json['status'] as String?,
       isPurchased: (json['is_purchased'] as num?)?.toInt(),
       isEvaluated: json['is_evaluated'] as bool?,
+      finalScore: (json['final_score'] as num?)?.toInt(),
       messages: (json['messages'] as List<dynamic>)
           .map((e) => ChatMessageResponse.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -111,5 +112,6 @@ Map<String, dynamic> _$$ChatRoomDetailResponseImplToJson(
       'status': instance.status,
       'is_purchased': instance.isPurchased,
       'is_evaluated': instance.isEvaluated,
+      'final_score': instance.finalScore,
       'messages': instance.messages,
     };

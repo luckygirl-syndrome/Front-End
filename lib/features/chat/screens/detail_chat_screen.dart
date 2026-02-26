@@ -145,6 +145,7 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
       ),
       child: Scaffold(
         backgroundColor: AppColors.white,
+        resizeToAvoidBottomInset: true,
         body: detailAsync.when(
           data: (d) => _buildChatBody(ref, d),
           loading: () {
@@ -420,6 +421,9 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
 
   // 4. 하단 입력창 + 시스템바(맨 아래)까지 AppColors.white 배경.
   Widget _buildInputArea(WidgetRef ref) {
+    final mediaQuery = MediaQuery.of(context);
+    final hasKeyboard = mediaQuery.viewInsets.bottom > 0;
+
     return Container(
       color: AppColors.white,
       child: Column(
@@ -542,13 +546,13 @@ class _DetailChatScreenState extends ConsumerState<DetailChatScreen>
               ),
             ),
           ),
-          // 맨 아래 상태바(홈 인디케이터) 영역까지 흰색 배경
-          Builder(
-            builder: (context) => Container(
-              height: MediaQuery.of(context).padding.bottom,
-              color: AppColors.white,
+          // 맨 아래 상태바(홈 인디케이터)용 여백은
+          // 키보드가 없을 때만 추가 (키보드가 있으면 바로 붙게)
+          if (!hasKeyboard)
+            SizedBox(
+              height: mediaQuery.padding.bottom,
+              child: const ColoredBox(color: AppColors.white),
             ),
-          ),
         ],
       ),
     );

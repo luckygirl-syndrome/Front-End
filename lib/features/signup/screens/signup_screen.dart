@@ -33,6 +33,7 @@ class SignupScreen extends ConsumerWidget {
           });
         },
       ),
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),

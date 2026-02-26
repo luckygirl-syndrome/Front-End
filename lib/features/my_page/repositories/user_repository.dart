@@ -26,9 +26,19 @@ class UserRepository {
           type: DioExceptionType.badResponse,
         );
       }
+
       final data = response.data;
-      if (data is! Map<String, dynamic>) throw Exception('Invalid profile response');
-      return UserProfile.fromJson(data);
+      if (data is! Map<String, dynamic>) {
+        throw Exception('Invalid profile response: $data');
+      }
+
+      // { "status": "...", "data": { ... } } 또는 바로 { ... } 인 경우 모두 처리
+      final rawProfile = data['data'] ?? data;
+      if (rawProfile is! Map<String, dynamic>) {
+        throw Exception('Invalid profile data: $rawProfile');
+      }
+
+      return UserProfile.fromJson(rawProfile);
     } catch (e) {
       rethrow;
     }

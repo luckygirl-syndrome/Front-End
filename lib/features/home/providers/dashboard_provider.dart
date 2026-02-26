@@ -27,8 +27,14 @@ class Dashboard extends _$Dashboard {
       final response = await repository.getHomeDashboard();
 
       debugPrint("✅ [Dashboard] Response: $response");
-      // API response structure: { "id": 1, "data": { ... } }
-      return HomeDashboardData.fromJson(response['data']);
+      // API response structure: { "status": "...", "data": { ... } } 또는 { ... }
+      final rawData = response['data'] ?? response;
+
+      if (rawData is! Map<String, dynamic>) {
+        throw Exception('Invalid dashboard response: $response');
+      }
+
+      return HomeDashboardData.fromJson(rawData);
     } catch (e) {
       debugPrint(
         "❌ [Dashboard] API Error: $e. Falling back to default values.",
